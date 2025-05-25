@@ -1,0 +1,105 @@
+/* style.css */
+
+:root {
+  --azure: #E3EFED;
+  --charcoal: #2B384B;
+  --indigo: #234159;
+  --purple: #2C0F29;
+  --white: #ffffff;
+}
+
+/* Reset and center body */
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: 'Inter', sans-serif;
+  background-color: var(--azure);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Container to center content inside */
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  align-items: center;
+}
+
+/* Card-like form box */
+.form-box {
+  background-color: var(--white);
+  padding: 30px;
+  width: 320px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(44, 15, 41, 0.1);
+  border-top: 4px solid var(--purple);
+  transition: transform 0.2s ease;
+}
+
+.form-box:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 16px rgba(44, 15, 41, 0.2);
+}
+
+/* Headings */
+h2 {
+  color: var(--indigo);
+  font-weight: 600;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+/* Form inputs */
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0 20px;
+  border: 1px solid var(--charcoal);
+  border-radius: 6px;
+  background-color: #f9f9f9;
+  font-size: 14px;
+}
+
+input:focus {
+  outline: none;
+  border-color: var(--purple);
+  box-shadow: 0 0 5px var(--purple);
+}
+
+/* Submit button */
+button {
+  width: 100%;
+  padding: 12px;
+  background-color: var(--indigo);
+  color: var(--white);
+  border: none;
+  border-radius: 6px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+button:hover {
+  background-color: var(--purple);
+}
+
+/* Footer links */
+.form-footer {
+  margin-top: 10px;
+  font-size: 13px;
+  text-align: center;
+}
+
+.form-footer a {
+  color: var(--indigo);
+  text-decoration: none;
+}
+
+.form-footer a:hover {
+  text-decoration: underline;
+}
