@@ -14,8 +14,17 @@
     <input type="text" name="gender" placeholder="Gender" required>
     <button type="submit">Create Account</button>
     <div class="form-footer">
-      Already have an account? <a href="/login">Login</a>
+      Already have an account? <a href="{% url 'login' %}">Login</a>
     </div>
   </form>
 </div>
+
+{% if messages %}
+  <ul class="messages">
+    {% for message in messages %}
+      <li>{{ message }}</li>
+    {% endfor %}
+  </ul>
+{% endif %}
 {% endblock %}
+

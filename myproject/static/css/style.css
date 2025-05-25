@@ -103,3 +103,14 @@ button:hover {
 .form-footer a:hover {
   text-decoration: underline;
 }
+
+.home-container {
+  max-width: 600px;
+  margin: 50px auto;
+  text-align: center;
+}
+
+.home-container a {
+  color: #2a8bfc;
+  text-decoration: none;
+}
