@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Request Local Help{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">
+                        <i class="fas fa-hands-helping me-2"></i>Request Local Guide Assistance
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info mb-4">
+                        <h5><i class="fas fa-info-circle me-2"></i>Local Guide Assistance</h5>
+                        <p>Our local guides are verified Agadir residents who can help you with:</p>
+                        <ul>
+                            <li><strong>Translation Help:</strong> Communicate with restaurant staff</li>
+                            <li><strong>Restaurant Recommendations:</strong> Find authentic local places</li>
+                            <li><strong>Menu Explanations:</strong> Understand traditional Moroccan dishes</li>
+                            <li><strong>Directions:</strong> Find your way to restaurants</li>
+                            <li><strong>Cultural Information:</strong> Learn about local food customs</li>
+                        </ul>
+                    </div>
+
+                    <form method="POST" action="">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="form-group mb-3">
+                            {{ form.request_type.label(class="form-label") }}
+                            {{ form.request_type(class="form-select") }}
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            {{ form.location.label(class="form-label") }}
+                            {{ form.location(class="form-select") }}
+                            <small class="form-text text-muted">We'll find a guide who knows this area</small>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            {{ form.preferred_language.label(class="form-label") }}
+                            {{ form.preferred_language(class="form-select") }}
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            {{ form.request_details.label(class="form-label") }}
+                            {{ form.request_details(class="form-control", rows=5, placeholder="Please provide details about what you need help with...") }}
+                        </div>
+                        
+                        <div class="form-group">
+                            {{ form.submit(class="btn btn-primary") }}
+                            <a href="{{ url_for('main.dashboard') }}" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+                <div class="card-footer">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-clock text-muted me-2"></i>
+                        <small class="text-muted">Most requests are answered within 15 minutes</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

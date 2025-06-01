@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+
+{% block title %}Restorino - Discover Agadir's Best Restaurants{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="hero-content">
+        <h1>Discover Agadir's Best Dining Experiences</h1>
+        <p>Find authentic local restaurants and explore the culinary treasures of Agadir, Morocco</p>
+        <div class="search-box">
+            <form action="{{ url_for('main.search') }}" method="get">
+                <div class="search-group">
+                    <input type="text" name="query" placeholder="Search for restaurants, cuisine...">
+                    <select name="location">
+                        <option value="">All Locations</option>
+                        {% for location in locations %}
+                        <option value="{{ location }}">{{ location }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="btn-primary">Search</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+<section class="categories">
+    <h2>Explore by Cuisine</h2>
+    <div class="category-grid">
+        {% for cuisine in cuisine_types %}
+        <a href="{{ url_for('main.search', cuisine=cuisine) }}" class="category-card">
+            <div class="category-icon">
+                {% if cuisine == 'Moroccan Traditional' %}
+                <i class="fas fa-utensils"></i>
+                {% elif cuisine == 'Seafood' %}
+                <i class="fas fa-fish"></i>
+                {% elif cuisine == 'Mediterranean' %}
+                <i class="fas fa-lemon"></i>
+                {% elif cuisine == 'International' %}
+                <i class="fas fa-globe-africa"></i>
+                {% elif cuisine == 'Fast Food' %}
+                <i class="fas fa-hamburger"></i>
+                {% elif cuisine == 'Café/Tea House' %}
+                <i class="fas fa-coffee"></i>
+                {% elif cuisine == 'Berber Cuisine' %}
+                <i class="fas fa-mortar-pestle"></i>
+                {% else %}
+                <i class="fas fa-utensils"></i>
+                {% endif %}
+            </div>
+            <h3>{{ cuisine }}</h3>
+        </a>
+        {% endfor %}
+    </div>
+</section>
+
+<section class="top-restaurants">
+    <h2>Top-Rated Restaurants</h2>
+    <div class="restaurant-grid">
+        {% for restaurant in top_restaurants %}
+        <div class="restaurant-card">
+            <a href="{{ url_for('main.restaurant_detail', id=restaurant.id) }}">
+                {% set photos = restaurant.photos %}
+                <div class="restaurant-image">
+                    {% if photos %}
+                    <img src="{{ url_for('static', filename=photos[0].image_url) }}" alt="{{ restaurant.name }}">
+                    {% else %}
+                    <div class="no-image">
+                        <i class="fas fa-utensils"></i>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="restaurant-info">
+                    <h3>{{ restaurant.name }}</h3>
+                    <div class="restaurant-meta">
+                        <span class="cuisine">{{ restaurant.type }}</span>
+                        <span class="location">{{ restaurant.location }}</span>
+                    </div>
+                    <div class="rating">
+                        {% for i in range(5) %}
+                            {% if i < restaurant.average_rating|int %}
+                            <i class="fas fa-star"></i>
+                            {% elif (i < (restaurant.average_rating + 0.5)|int) and (restaurant.average_rating % 1 >= 0.5) %}
+                            <i class="fas fa-star-half-alt"></i>
+                            {% else %}
+                            <i class="far fa-star"></i>
+                            {% endif %}
+                        {% endfor %}
+                        <span class="rating-value">{{ restaurant.average_rating }}</span>
+                    </div>
+                    <div class="hours">
+                        <i class="far fa-clock"></i> {{ restaurant.open_time }} - {{ restaurant.close_time }}
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+    {% if not top_restaurants %}
+    <div class="empty-state">
+        <i class="fas fa-utensils"></i>
+        <p>No restaurants available yet. Be the first to add one!</p>
+        {% if current_user.is_authenticated and current_user.user_type == 'owner' %}
+        <a href="{{ url_for('main.add_restaurant') }}" class="btn-primary">Add Restaurant</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</section>
+
+<section class="new-restaurants">
+    <h2>Newly Added Restaurants</h2>
+    <div class="restaurant-grid">
+        {% for restaurant in new_restaurants %}
+        <div class="restaurant-card">
+            <a href="{{ url_for('main.restaurant_detail', id=restaurant.id) }}">
+                {% set photos = restaurant.photos %}
+                <div class="restaurant-image">
+                    {% if photos %}
+                    <img src="{{ url_for('static', filename=photos[0].image_url) }}" alt="{{ restaurant.name }}">
+                    {% else %}
+                    <div class="no-image">
+                        <i class="fas fa-utensils"></i>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="restaurant-info">
+                    <h3>{{ restaurant.name }}</h3>
+                    <div class="restaurant-meta">
+                        <span class="cuisine">{{ restaurant.type }}</span>
+                        <span class="location">{{ restaurant.location }}</span>
+                    </div>
+                    <div class="rating">
+                        {% for i in range(5) %}
+                            {% if i < restaurant.average_rating|int %}
+                            <i class="fas fa-star"></i>
+                            {% elif (i < (restaurant.average_rating + 0.5)|int) and (restaurant.average_rating % 1 >= 0.5) %}
+                            <i class="fas fa-star-half-alt"></i>
+                            {% else %}
+                            <i class="far fa-star"></i>
+                            {% endif %}
+                        {% endfor %}
+                        <span class="rating-value">{{ restaurant.average_rating }}</span>
+                    </div>
+                    <div class="hours">
+                        <i class="far fa-clock"></i> {{ restaurant.open_time }} - {{ restaurant.close_time }}
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+    {% if not new_restaurants %}
+    <div class="empty-state">
+        <i class="fas fa-utensils"></i>
+        <p>No restaurants available yet. Be the first to add one!</p>
+        {% if current_user.is_authenticated and current_user.user_type == 'owner' %}
+        <a href="{{ url_for('main.add_restaurant') }}" class="btn-primary">Add Restaurant</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</section>
+
+<section class="locations">
+    <h2>Explore by Location</h2>
+    <div class="location-grid">
+        {% for location in locations %}
+        <a href="{{ url_for('main.search', location=location) }}" class="location-card">
+            <h3>{{ location }}</h3>
+        </a>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

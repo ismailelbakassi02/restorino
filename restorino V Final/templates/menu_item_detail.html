@@ -1,0 +1,345 @@
+{% extends "base.html" %}
+
+{% block title %}{{ menu_item.name }} - {{ restaurant.name }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <!-- Menu Item Details -->
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h1 class="card-title">{{ menu_item.name }}</h1>
+                        <h3 class="text-primary">{{ menu_item.price }} MAD</h3>
+                    </div>
+                    
+                    <!-- Restaurant Owner Actions -->
+                    {% if current_user.is_authenticated and current_user.user_type == 'owner' %}
+                        {% set owner = current_user.restaurant_owner %}
+                        {% if owner and restaurant.owner_id == owner.id %}
+                        <div class="owner-actions mb-3">
+                            <div class="d-flex gap-2">
+                                <a href="{{ url_for('main.edit_menu_item', id=menu_item.id) }}" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-edit"></i> Edit Menu Item
+                                </a>
+                                <a href="{{ url_for('main.add_menu_item_image', id=menu_item.id) }}" class="btn btn-sm btn-info">
+                                    <i class="fas fa-image"></i> {% if menu_item.image_url %}Change{% else %}Add{% endif %} Image
+                                </a>
+                                <form action="{{ url_for('main.delete_menu_item', id=menu_item.id) }}" method="POST" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this menu item? This action cannot be undone.')">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        {% endif %}
+                    {% endif %}
+                    
+                    <!-- Image -->
+                    {% if menu_item.image_url %}
+                    <div class="text-center mb-4">
+                        <img src="{{ url_for('static', filename=menu_item.image_url) }}" class="img-fluid rounded" alt="{{ menu_item.name }}" style="max-height: 400px;" onerror="this.src='/static/img/default-restaurant.jpg'">
+                    </div>
+                    {% else %}
+                    <div class="text-center mb-4">
+                        <div class="no-image-placeholder">
+                            <i class="fas fa-utensils"></i>
+                            <p>No image available</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Rating -->
+                    <div class="mb-3">
+                        <div class="d-flex align-items-center">
+                            <div class="rating-stars">
+                                {% for i in range(5) %}
+                                    {% if i < menu_item.average_rating|int %}
+                                        <i class="fas fa-star text-warning"></i>
+                                    {% elif i < menu_item.average_rating %}
+                                        <i class="fas fa-star-half-alt text-warning"></i>
+                                    {% else %}
+                                        <i class="far fa-star text-warning"></i>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                            <span class="ms-2">{{ menu_item.average_rating }} ({{ reviews|length }} reviews)</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Description -->
+                    <div class="mb-4">
+                        <h5>Description</h5>
+                        <p>{{ menu_item.description }}</p>
+                    </div>
+                    
+                    <!-- Details -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h5>Ingredients</h5>
+                            <p>{{ menu_item.ingredients or 'Not specified' }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Preparation Time</h5>
+                            <p>{{ menu_item.preparation_time or 'Not specified' }}</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Dietary Information -->
+                    <div class="mb-4">
+                        <h5>Dietary Information</h5>
+                        <div class="d-flex flex-wrap">
+                            {% if menu_item.is_vegetarian %}
+                            <span class="badge bg-success me-2 mb-2">Vegetarian</span>
+                            {% endif %}
+                            
+                            {% if menu_item.is_vegan %}
+                            <span class="badge bg-success me-2 mb-2">Vegan</span>
+                            {% endif %}
+                            
+                            {% if menu_item.is_gluten_free %}
+                            <span class="badge bg-success me-2 mb-2">Gluten Free</span>
+                            {% endif %}
+                            
+                            {% if menu_item.spice_level == 0 %}
+                            <span class="badge bg-light text-dark me-2 mb-2">Not Spicy</span>
+                            {% elif menu_item.spice_level == 1 %}
+                            <span class="badge bg-info me-2 mb-2">Mild</span>
+                            {% elif menu_item.spice_level == 2 %}
+                            <span class="badge bg-primary me-2 mb-2">Medium</span>
+                            {% elif menu_item.spice_level == 3 %}
+                            <span class="badge bg-warning me-2 mb-2">Hot</span>
+                            {% elif menu_item.spice_level == 4 %}
+                            <span class="badge bg-danger me-2 mb-2">Very Hot</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Restaurant Info -->
+                    <div class="mb-3">
+                        <h5>Available at</h5>
+                        <a href="{{ url_for('main.restaurant_detail', id=restaurant.id) }}" class="text-decoration-none">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-utensils me-2"></i>
+                                <span>{{ restaurant.name }}</span>
+                            </div>
+                        </a>
+                    </div>
+                    
+                    <!-- Edit Button (for restaurant owners) -->
+                    {% if current_user.is_authenticated and current_user.user_type == 'restaurant_owner' %}
+                        {% set owner = current_user.restaurant_owner %}
+                        {% if owner and restaurant.owner_id == owner.id %}
+                        <div class="mt-3">
+                            <a href="{{ url_for('main.edit_menu_item', id=menu_item.id) }}" class="btn btn-outline-primary">
+                                <i class="fas fa-edit me-1"></i> Edit Menu Item
+                            </a>
+                        </div>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Reviews Section -->
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h3>Reviews</h3>
+                </div>
+                <div class="card-body">
+                    <!-- Add Review Form (for tourists only) -->
+                    {% if review_form %}
+                    <div class="mb-4">
+                        <h5>Add Your Review</h5>
+                        <form method="POST" action="{{ url_for('main.add_menu_item_review', id=menu_item.id) }}" enctype="multipart/form-data">
+                            {{ review_form.hidden_tag() }}
+                            <div class="mb-3">
+                                {{ review_form.rating.label(class="form-label") }}
+                                {{ review_form.rating(class="form-select") }}
+                            </div>
+                            <div class="mb-3">
+                                {{ review_form.comment.label(class="form-label") }}
+                                {{ review_form.comment(class="form-control", rows=3) }}
+                            </div>
+                            <div class="mb-3">
+                                {{ review_form.images.label(class="form-label") }}
+                                {{ review_form.images(class="form-control", id="menu-review-images") }}
+                                <div class="form-text">Upload photos of your experience with this dish</div>
+                                <div class="image-preview-container" id="menu-image-preview-container"></div>
+                            </div>
+                            {{ review_form.submit(class="btn btn-primary") }}
+                        </form>
+                    </div>
+                    
+                    <script>
+                        // Image preview script
+                        document.getElementById('menu-review-images').addEventListener('change', function(event) {
+                            const previewContainer = document.getElementById('menu-image-preview-container');
+                            previewContainer.innerHTML = '';
+                            
+                            if (this.files) {
+                                Array.from(this.files).forEach(file => {
+                                    if (file) {
+                                        const reader = new FileReader();
+                                        
+                                        reader.onload = function(e) {
+                                            const preview = document.createElement('div');
+                                            preview.className = 'image-preview';
+                                            
+                                            const img = document.createElement('img');
+                                            img.src = e.target.result;
+                                            
+                                            preview.appendChild(img);
+                                            previewContainer.appendChild(preview);
+                                        }
+                                        
+                                        reader.readAsDataURL(file);
+                                    }
+                                });
+                            }
+                        });
+                    </script>
+                    {% elif current_user.is_authenticated and current_user.user_type == 'tourist' %}
+                        <div class="alert alert-info mb-4">
+                            You've already reviewed this menu item.
+                        </div>
+                    {% endif %}
+                    
+                    <!-- Reviews List -->
+                    {% if reviews %}
+                        {% for review in reviews %}
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <div class="d-flex align-items-center">
+                                        {% if review.tourist.user.profile_image %}
+                                        <img src="{{ url_for('static', filename=review.tourist.user.profile_image) }}" alt="{{ review.tourist.user.name }}" class="profile-pic-small me-2">
+                                        {% endif %}
+                                        <div>
+                                            <h5 class="mb-0">{{ review.tourist.user.name }}</h5>
+                                            <div class="text-muted small">{{ review.date.strftime('%B %d, %Y') }}</div>
+                                        </div>
+                                    </div>
+                                    <div class="rating-stars">
+                                        {% for i in range(5) %}
+                                            {% if i < review.rating %}
+                                                <i class="fas fa-star text-warning"></i>
+                                            {% else %}
+                                                <i class="far fa-star text-warning"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <p class="mb-2">{{ review.comment }}</p>
+                                
+                                {% if review.images %}
+                                <div class="review-image-gallery">
+                                    <div class="review-image-gallery-title">Photos from this review:</div>
+                                    <div class="review-images">
+                                        {% for image in review.images %}
+                                        <div class="review-image">
+                                            <img src="{{ url_for('static', filename=image.image_url) }}" alt="Review image" onerror="this.src='/static/img/default-restaurant.jpg'">
+                                            {% if current_user.is_authenticated and current_user.user_type == 'tourist' %}
+                                                {% set tourist = current_user.tourist %}
+                                                {% if tourist and review.tourist_id == tourist.id %}
+                                                <div class="delete-image">
+                                                    <form action="{{ url_for('main.delete_menu_item_review_image', image_id=image.id) }}" method="POST">
+                                                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this image?')">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                                {% endif %}
+                                            {% endif %}
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-4">
+                            <p class="text-muted">No reviews yet. Be the first to review this dish!</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sidebar -->
+        <div class="col-md-4">
+            <!-- Other Menu Items -->
+            {% if other_items %}
+            <div class="card mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Other Menu Items</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        {% for item in other_items %}
+                        <a href="{{ url_for('main.menu_item_detail', id=item.id) }}" class="list-group-item list-group-item-action">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">{{ item.name }}</h6>
+                                    <div class="small text-muted">
+                                        {% for i in range(5) %}
+                                            {% if i < item.average_rating|int %}
+                                                <i class="fas fa-star text-warning"></i>
+                                            {% else %}
+                                                <i class="far fa-star text-warning"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                        <span class="ms-1">{{ item.average_rating }}</span>
+                                    </div>
+                                </div>
+                                <span class="text-primary">{{ item.price }} MAD</span>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="card-footer bg-white text-center">
+                    <a href="{{ url_for('main.restaurant_detail', id=restaurant.id) }}" class="btn btn-outline-primary btn-sm">
+                        View Full Menu
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Restaurant Info Card -->
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Restaurant Information</h5>
+                </div>
+                <div class="card-body">
+                    <h6 class="card-title">{{ restaurant.name }}</h6>
+                    <p class="card-text">{{ restaurant.description }}</p>
+                    <ul class="list-group list-group-flush mb-3">
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span><i class="fas fa-map-marker-alt me-2"></i> Location</span>
+                            <span>{{ restaurant.location }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span><i class="fas fa-utensils me-2"></i> Cuisine</span>
+                            <span>{{ restaurant.type }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span><i class="far fa-clock me-2"></i> Hours</span>
+                            <span>{{ restaurant.open_time }} - {{ restaurant.close_time }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span><i class="fas fa-phone me-2"></i> Contact</span>
+                            <span>{{ restaurant.contact_number }}</span>
+                        </li>
+                    </ul>
+                    <a href="{{ url_for('main.restaurant_detail', id=restaurant.id) }}" class="btn btn-primary w-100">
+                        Visit Restaurant Page
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

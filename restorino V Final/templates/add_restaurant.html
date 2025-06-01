@@ -1,0 +1,348 @@
+{% extends "base.html" %}
+
+{% block title %}Add Restaurant - Restorino{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <div class="form-header">
+        <h1>Add Your Restaurant</h1>
+        <p>Showcase your restaurant to tourists visiting Agadir</p>
+    </div>
+    
+    <div class="form-card">
+        <form method="POST" action="{{ url_for('main.add_restaurant') }}">
+            {{ form.hidden_tag() }}
+            
+            <div class="form-section">
+                <h2>Basic Information</h2>
+                
+                <div class="form-group">
+                    {{ form.name.label(class="form-label") }}
+                    {% if form.name.errors %}
+                        {{ form.name(class="form-control is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.name.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.name(class="form-control") }}
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    {{ form.location.label(class="form-control-label") }}
+                    {{ form.location(class="form-control" + (' is-invalid' if form.location.errors else '')) }}
+                    {% for error in form.location.errors %}
+                        <div class="invalid-feedback">
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+                </div>
+                
+                <div class="form-group">
+                    {{ form.location_id.label(class="form-control-label") }}
+                    {{ form.location_id(class="form-control" + (' is-invalid' if form.location_id.errors else '')) }}
+                    <small class="form-text text-muted">Select a district from the dropdown to associate your restaurant with a specific area in Agadir.</small>
+                    {% for error in form.location_id.errors %}
+                        <div class="invalid-feedback">
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group half">
+                        {{ form.type.label(class="form-label") }}
+                        {% if form.type.errors %}
+                            {{ form.type(class="form-control is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.type.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.type(class="form-control") }}
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group half">
+                        {{ form.location.label(class="form-label") }}
+                        {% if form.location.errors %}
+                            {{ form.location(class="form-control is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.location.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.location(class="form-control") }}
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    {{ form.address.label(class="form-label") }}
+                    {% if form.address.errors %}
+                        {{ form.address(class="form-control is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.address.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.address(class="form-control") }}
+                    {% endif %}
+                    <small class="form-text text-muted">Please provide the full street address of your restaurant</small>
+                </div>
+                
+                <div class="form-section">
+                    <h2>Location on Map</h2>
+                    <p class="text-muted mb-3">You can either provide the exact coordinates or a Google Maps link to your restaurant</p>
+                    
+                    <div class="form-row">
+                        <div class="form-group half">
+                            {{ form.latitude.label(class="form-label") }}
+                            {% if form.latitude.errors %}
+                                {{ form.latitude(class="form-control is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.latitude.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.latitude(class="form-control") }}
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group half">
+                            {{ form.longitude.label(class="form-label") }}
+                            {% if form.longitude.errors %}
+                                {{ form.longitude(class="form-control is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.longitude.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.longitude(class="form-control") }}
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        {{ form.google_maps_link.label(class="form-label") }}
+                        {% if form.google_maps_link.errors %}
+                            {{ form.google_maps_link(class="form-control is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.google_maps_link.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.google_maps_link(class="form-control") }}
+                        {% endif %}
+                        <small class="form-text text-muted">Paste a link from Google Maps to your restaurant location</small>
+                    </div>
+                    
+                    <div id="map-preview" class="mb-3" style="height: 300px; border-radius: 8px; display: none;">
+                        <!-- Map will be displayed here -->
+                    </div>
+                    
+                    <div id="map-placeholder" class="text-center p-4 bg-light rounded mb-3">
+                        <i class="fas fa-map-marker-alt fa-3x text-muted mb-2"></i>
+                        <p class="text-muted">Enter latitude and longitude to see a map preview</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <h2>Hours & Contact</h2>
+                
+                <!-- Opening hours section removed as it's no longer in the form -->
+                
+                <!-- Contact information section removed as it's no longer in the form -->
+                
+                <div class="form-group">
+                    {{ form.price_range.label(class="form-label") }}
+                    {% if form.price_range.errors %}
+                        {{ form.price_range(class="form-control is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.price_range.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.price_range(class="form-control") }}
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <h2>Online Presence</h2>
+                
+                <!-- Website field removed as it's no longer in the form -->
+                
+                <div class="form-row">
+                    <div class="form-group half">
+                        {{ form.instagram.label(class="form-label") }}
+                        {% if form.instagram.errors %}
+                            {{ form.instagram(class="form-control is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.instagram.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.instagram(class="form-control") }}
+                        {% endif %}
+                        <small class="form-text text-muted">Just the username, without @</small>
+                    </div>
+                    
+                    <div class="form-group half">
+                        {{ form.facebook.label(class="form-label") }}
+                        {% if form.facebook.errors %}
+                            {{ form.facebook(class="form-control is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.facebook.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.facebook(class="form-control") }}
+                        {% endif %}
+                        <small class="form-text text-muted">Your Facebook page URL or username</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <h2>Description</h2>
+                
+                <div class="form-group">
+                    {{ form.description.label(class="form-label") }}
+                    {% if form.description.errors %}
+                        {{ form.description(class="form-control is-invalid", rows=6) }}
+                        <div class="invalid-feedback">
+                            {% for error in form.description.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.description(class="form-control", rows=6, placeholder="Tell tourists about your restaurant, cuisine, specialties, and what makes it unique...") }}
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <a href="{{ url_for('main.dashboard') }}" class="btn-secondary">Cancel</a>
+                {{ form.submit(class="btn-primary") }}
+            </div>
+        </form>
+    </div>
+    
+    <div class="form-info">
+        <div class="info-card">
+            <h3>What Happens Next?</h3>
+            <ol>
+                <li>Your restaurant will be added to Restorino immediately</li>
+                <li>After adding your restaurant, you can add menu items and photos</li>
+                <li>Tourists can discover your restaurant and leave reviews</li>
+            </ol>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- Google Maps API with callback to initMap function -->
+<script src="https://maps.googleapis.com/maps/api/js?key={{ config.GOOGLE_MAPS_API_KEY }}&callback=initMap" async defer></script>
+<script>
+    // Initialize map variables
+    let map;
+    let marker;
+    let mapInitialized = false;
+    
+    // Function to initialize the map
+    function initMap() {
+        // Default to Agadir center if no coordinates provided
+        const defaultLocation = { lat: 30.4278, lng: -9.5981 };
+        
+        // Create map with default options
+        map = new google.maps.Map(document.getElementById('map-preview'), {
+            zoom: 14,
+            center: defaultLocation,
+            mapTypeControl: true,
+            streetViewControl: false,
+            fullscreenControl: true
+        });
+        
+        // Create a marker that can be repositioned
+        marker = new google.maps.Marker({
+            position: defaultLocation,
+            map: map,
+            draggable: true,
+            animation: google.maps.Animation.DROP
+        });
+        
+        // When marker is dragged, update the form fields
+        google.maps.event.addListener(marker, 'dragend', function() {
+            const position = marker.getPosition();
+            document.getElementById('latitude').value = position.lat();
+            document.getElementById('longitude').value = position.lng();
+        });
+        
+        mapInitialized = true;
+        checkCoordinates();
+    }
+    
+    // Function to update map when coordinates change
+    function updateMap(lat, lng) {
+        if (!mapInitialized) return;
+        
+        const position = new google.maps.LatLng(lat, lng);
+        marker.setPosition(position);
+        map.setCenter(position);
+        
+        // Show the map and hide placeholder
+        document.getElementById('map-preview').style.display = 'block';
+        document.getElementById('map-placeholder').style.display = 'none';
+    }
+    
+    // Function to check if coordinates are valid
+    function checkCoordinates() {
+        const latField = document.getElementById('latitude');
+        const lngField = document.getElementById('longitude');
+        
+        if (latField && lngField && latField.value && lngField.value) {
+            const lat = parseFloat(latField.value);
+            const lng = parseFloat(lngField.value);
+            
+            if (!isNaN(lat) && !isNaN(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+                updateMap(lat, lng);
+                return;
+            }
+        }
+        
+        // If coordinates are invalid or empty, hide map and show placeholder
+        if (document.getElementById('map-preview')) {
+            document.getElementById('map-preview').style.display = 'none';
+        }
+        if (document.getElementById('map-placeholder')) {
+            document.getElementById('map-placeholder').style.display = 'block';
+        }
+    }
+    
+    // Set up event listeners when document is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        const latField = document.getElementById('latitude');
+        const lngField = document.getElementById('longitude');
+        
+        // Add event listeners to coordinate fields
+        if (latField && lngField) {
+            latField.addEventListener('input', checkCoordinates);
+            lngField.addEventListener('input', checkCoordinates);
+        }
+    });
+</script>
+{% endblock %}

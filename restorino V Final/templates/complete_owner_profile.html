@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Complete Your Restaurant Owner Profile - Restorino{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h2>Complete Your Restaurant Owner Profile</h2>
+            <p>Provide your contact information to help tourists reach you.</p>
+        </div>
+        <form method="POST" action="{{ url_for('main.complete_owner_profile') }}" class="auth-form">
+            {{ form.hidden_tag() }}
+            <div class="form-group">
+                {{ form.contact_number.label(class="form-label") }}
+                {% if form.contact_number.errors %}
+                    {{ form.contact_number(class="form-control is-invalid") }}
+                    <div class="invalid-feedback">
+                        {% for error in form.contact_number.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.contact_number(class="form-control") }}
+                {% endif %}
+            </div>
+            <div class="form-group">
+                {{ form.submit(class="btn-primary btn-block") }}
+            </div>
+        </form>
+        <div class="auth-footer">
+            <p>Note: Your account will need to be verified by an admin before you can add restaurants.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

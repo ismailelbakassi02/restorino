@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Add Photo - {{ restaurant.name }} - Restorino{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <div class="form-header">
+        <h1>Add Photo</h1>
+        <p>Upload a photo for "{{ restaurant.name }}"</p>
+    </div>
+    
+    <div class="form-card">
+        <form method="POST" action="{{ url_for('main.add_photo', id=restaurant.id) }}" enctype="multipart/form-data">
+            {{ form.hidden_tag() }}
+            
+            <div class="form-group">
+                {{ form.photo.label(class="form-label") }}
+                {% if form.photo.errors %}
+                    {{ form.photo(class="form-control is-invalid") }}
+                    <div class="invalid-feedback">
+                        {% for error in form.photo.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.photo(class="form-control") }}
+                {% endif %}
+                <small class="form-text text-muted">Allowed formats: JPG, JPEG, PNG, GIF. Max size: 16MB.</small>
+            </div>
+            
+            <div class="form-group">
+                {{ form.caption.label(class="form-label") }}
+                {% if form.caption.errors %}
+                    {{ form.caption(class="form-control is-invalid") }}
+                    <div class="invalid-feedback">
+                        {% for error in form.caption.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.caption(class="form-control", placeholder="Optional: Add a caption for this photo") }}
+                {% endif %}
+            </div>
+            
+            <div class="form-actions">
+                <a href="{{ url_for('main.restaurant_detail', id=restaurant.id) }}" class="btn-secondary">Cancel</a>
+                {{ form.submit(class="btn-primary") }}
+            </div>
+        </form>
+    </div>
+    
+    <div class="form-info">
+        <div class="info-card">
+            <h3>Photo Tips</h3>
+            <ul>
+                <li>Use high-quality, well-lit photos</li>
+                <li>Showcase your restaurant's ambiance and food</li>
+                <li>Add descriptive captions to help tourists understand what they're seeing</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

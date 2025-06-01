@@ -1,0 +1,180 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ user.name }}'s Profile | Restorino{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <!-- User Profile Header -->
+        <div class="col-12 mb-4">
+            <div class="card shadow">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-2 text-center">
+                            {% if user.profile_image %}
+                            <img src="{{ url_for('static', filename=user.profile_image) }}" class="rounded-circle img-thumbnail" width="150" height="150" alt="{{ user.name }}">
+                            {% else %}
+                            <img src="https://via.placeholder.com/150?text={{ user.name[0] }}" class="rounded-circle img-thumbnail" width="150" height="150" alt="{{ user.name }}">
+                            {% endif %}
+                        </div>
+                        <div class="col-md-7">
+                            <h1 class="display-5 mb-0">{{ user.name }}</h1>
+                            <p class="text-muted">Tourist from {{ tourist.country }}</p>
+                            <p>{{ tourist.bio }}</p>
+                            
+                            <div class="d-flex mt-3">
+                                {% if tourist.instagram %}
+                                <a href="https://instagram.com/{{ tourist.instagram }}" target="_blank" class="btn btn-outline-danger me-2">
+                                    <i class="fab fa-instagram"></i> Instagram
+                                </a>
+                                {% endif %}
+                                
+                                {% if tourist.twitter %}
+                                <a href="https://twitter.com/{{ tourist.twitter }}" target="_blank" class="btn btn-outline-info me-2">
+                                    <i class="fab fa-twitter"></i> Twitter
+                                </a>
+                                {% endif %}
+                                
+                                {% if tourist.facebook %}
+                                <a href="https://facebook.com/{{ tourist.facebook }}" target="_blank" class="btn btn-outline-primary me-2">
+                                    <i class="fab fa-facebook"></i> Facebook
+                                </a>
+                                {% endif %}
+                                
+                                {% if tourist.tiktok %}
+                                <a href="https://tiktok.com/@{{ tourist.tiktok }}" target="_blank" class="btn btn-outline-dark me-2">
+                                    <i class="fab fa-tiktok"></i> TikTok
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-3 text-center">
+                            <div class="stats">
+                                <div class="mb-3">
+                                    <h3 class="mb-0">{{ completed_challenges|length }}</h3>
+                                    <small class="text-muted">Challenges Completed</small>
+                                </div>
+                                <div class="mb-3">
+                                    <h3 class="mb-0">{{ challenge_posts|length }}</h3>
+                                    <small class="text-muted">Posts Shared</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Completed Challenges -->
+        <div class="col-md-4 mb-4">
+            <div class="card shadow h-100">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">Completed Challenges</h3>
+                </div>
+                <div class="card-body">
+                    {% if completed_challenges %}
+                    <div class="list-group">
+                        {% for participant in completed_challenges %}
+                        <a href="{{ url_for('main.food_challenge_detail', id=participant.challenge_id) }}" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">{{ participant.challenge.name }}</h5>
+                                <small>{{ participant.completed_at.strftime('%Y-%m-%d') }}</small>
+                            </div>
+                            <p class="mb-1">{{ participant.challenge.description|truncate(100) }}</p>
+                            <div class="d-flex align-items-center">
+                                <span class="badge bg-success me-2"><i class="fas fa-trophy"></i> Completed</span>
+                                {% if participant.social_post_url %}
+                                <a href="{{ participant.social_post_url }}" target="_blank" class="btn btn-sm btn-outline-danger">
+                                    <i class="fab fa-instagram"></i> View Post
+                                </a>
+                                {% endif %}
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info">
+                        <p>No challenges completed yet.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Challenge Posts -->
+        <div class="col-md-8 mb-4">
+            <div class="card shadow h-100">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">Challenge Experiences</h3>
+                </div>
+                <div class="card-body">
+                    {% if challenge_posts %}
+                    <div class="challenge-posts">
+                        {% for post in challenge_posts %}
+                        <div class="challenge-post card mb-4">
+                            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="mb-0">{{ post.participant.challenge.name }}</h5>
+                                    <small class="text-muted">{{ post.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                                </div>
+                                <span class="badge bg-success"><i class="fas fa-trophy"></i> Completed</span>
+                            </div>
+                            <div class="card-body">
+                                <p class="card-text">{{ post.content }}</p>
+                                {% if post.image_url %}
+                                <div class="post-image mb-3">
+                                    <img src="{{ url_for('static', filename='uploads/challenges/' + post.image_url) }}" class="img-fluid rounded" alt="Challenge proof">
+                                </div>
+                                {% endif %}
+                                
+                                {% if post.participant.social_post_url %}
+                                <div class="instagram-embed mb-3">
+                                    <a href="{{ post.participant.social_post_url }}" target="_blank" class="btn btn-outline-danger btn-sm">
+                                        <i class="fab fa-instagram"></i> View on Instagram
+                                    </a>
+                                </div>
+                                {% endif %}
+                                
+                                <div class="post-actions d-flex align-items-center">
+                                    <button class="btn btn-sm btn-outline-primary me-2">
+                                        <i class="far fa-thumbs-up"></i> Like ({{ post.likes_count }})
+                                    </button>
+                                    <a href="{{ url_for('main.food_challenge_detail', id=post.participant.challenge_id) }}#comments-{{ post.id }}" class="btn btn-sm btn-outline-secondary">
+                                        <i class="far fa-comment"></i> Comments ({{ post.comments|length }})
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info">
+                        <p>No challenge experiences shared yet.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block styles %}
+<style>
+    .challenge-post {
+        border: none;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        transition: transform 0.2s;
+    }
+    
+    .challenge-post:hover {
+        transform: translateY(-3px);
+    }
+    
+    .post-image img {
+        max-height: 400px;
+        object-fit: cover;
+        width: 100%;
+    }
+</style>
+{% endblock %}

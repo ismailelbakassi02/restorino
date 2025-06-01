@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+
+{% block title %}Become a Local Guide{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">
+                        <i class="fas fa-map-marked-alt me-2"></i>Become a Local Guide
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <h5><i class="fas fa-info-circle me-2"></i>Join Our Local Guide Community</h5>
+                        <p>Share your knowledge of Agadir with tourists, help them discover authentic restaurants, and earn rewards!</p>
+                        <ul>
+                            <li>Connect tourists with authentic local cuisine</li>
+                            <li>Earn points and recognition for your contributions</li>
+                            <li>Help bridge cultural and language barriers</li>
+                            <li>Support local businesses and the community</li>
+                        </ul>
+                    </div>
+
+                    <form method="POST" action="">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="form-group mb-3">
+                            {{ form.neighborhood_expert.label(class="form-label") }}
+                            {{ form.neighborhood_expert(class="form-select") }}
+                            <small class="form-text text-muted">Select the area of Agadir you know best</small>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            {{ form.specialties.label(class="form-label") }}
+                            <div class="specialties-checkboxes">
+                                {% for checkbox in form.specialties %}
+                                <div class="form-check specialty-item">
+                                    {{ checkbox(class="form-check-input specialty-checkbox") }}
+                                    {{ checkbox.label(class="form-check-label") }}
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <div class="specialty-error text-danger d-none">Please select at least one specialty</div>
+                            <small class="form-text text-muted">Select at least one specialty</small>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            {{ form.languages.label(class="form-label") }}
+                            <div class="languages-checkboxes">
+                                {% for checkbox in form.languages %}
+                                <div class="form-check language-item">
+                                    {{ checkbox(class="form-check-input language-checkbox") }}
+                                    {{ checkbox.label(class="form-check-label") }}
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <div class="language-error text-danger d-none">Please select at least one language</div>
+                            <small class="form-text text-muted">Select all languages you speak fluently</small>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            {{ form.contact_number.label(class="form-label") }}
+                            {{ form.contact_number(class="form-control") }}
+                            <small class="form-text text-muted">This will be shared with tourists who request your help</small>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            {{ form.bio.label(class="form-label") }}
+                            {{ form.bio(class="form-control", rows=5) }}
+                            <small class="form-text text-muted">Tell tourists about your knowledge of Agadir, its restaurants, and cuisine</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            {{ form.submit(class="btn btn-primary", id="submit-btn") }}
+                            <a href="{{ url_for('main.dashboard') }}" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block styles %}
+<style>
+    .specialties-checkboxes, .languages-checkboxes {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+    
+    .specialty-item, .language-item {
+        cursor: pointer;
+        padding: 10px;
+        border-radius: 5px;
+        transition: background-color 0.2s;
+    }
+    
+    .specialty-item:hover, .language-item:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .specialty-item.selected, .language-item.selected {
+        background-color: #e9f5ff;
+        border: 1px solid #0d6efd;
+    }
+    
+    @media (max-width: 768px) {
+        .specialties-checkboxes, .languages-checkboxes {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Make entire specialty and language items clickable
+    document.querySelectorAll('.specialty-item, .language-item').forEach(function(item) {
+        item.addEventListener('click', function(e) {
+            // Don't trigger if clicking directly on the checkbox
+            if (e.target.type !== 'checkbox') {
+                const checkbox = this.querySelector('input[type="checkbox"]');
+                checkbox.checked = !checkbox.checked;
+                
+                // Toggle selected class
+                this.classList.toggle('selected', checkbox.checked);
+            } else {
+                // Toggle selected class when clicking directly on checkbox
+                this.classList.toggle('selected', e.target.checked);
+            }
+        });
+    });
+    
+    // Pre-select Arabic as default language
+    const arabicCheckbox = document.querySelector('input[value="Arabic"]');
+    if (arabicCheckbox) {
+        arabicCheckbox.checked = true;
+        arabicCheckbox.closest('.language-item').classList.add('selected');
+    }
+    
+    // Form validation
+    document.querySelector('form').addEventListener('submit', function(e) {
+        let isValid = true;
+        
+        // Check specialties
+        const specialtyChecked = document.querySelector('.specialty-checkbox:checked');
+        if (!specialtyChecked) {
+            document.querySelector('.specialty-error').classList.remove('d-none');
+            isValid = false;
+        } else {
+            document.querySelector('.specialty-error').classList.add('d-none');
+        }
+        
+        // Check languages
+        const languageChecked = document.querySelector('.language-checkbox:checked');
+        if (!languageChecked) {
+            document.querySelector('.language-error').classList.remove('d-none');
+            isValid = false;
+        } else {
+            document.querySelector('.language-error').classList.add('d-none');
+        }
+        
+        if (!isValid) {
+            e.preventDefault();
+        }
+    });
+});
+</script>
+{% endblock %}

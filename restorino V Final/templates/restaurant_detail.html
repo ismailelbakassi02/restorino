@@ -1,0 +1,466 @@
+{% extends "base.html" %}
+
+{% block title %}{{ restaurant.name }} - Restorino{% endblock %}
+
+{% block content %}
+<div class="restaurant-detail">
+    <div class="restaurant-header">
+        <div class="restaurant-info">
+            <h1>{{ restaurant.name }}</h1>
+            <div class="restaurant-meta">
+                <span class="cuisine">{{ restaurant.type }}</span>
+                <span class="location">{{ restaurant.location }}</span>
+                <div class="rating">
+                    {% for i in range(5) %}
+                        {% if i < restaurant.average_rating|int %}
+                        <i class="fas fa-star"></i>
+                        {% elif (i < (restaurant.average_rating + 0.5)|int) and (restaurant.average_rating % 1 >= 0.5) %}
+                        <i class="fas fa-star-half-alt"></i>
+                        {% else %}
+                        <i class="far fa-star"></i>
+                        {% endif %}
+                    {% endfor %}
+                    <span class="rating-value">{{ restaurant.average_rating }}</span>
+                    <span class="review-count">({{ reviews|length }} reviews)</span>
+                </div>
+            </div>
+        </div>
+        <div class="restaurant-actions">
+            {% if current_user.is_authenticated %}
+                {% if current_user.user_type == 'tourist' %}
+                    {% if review_form %}
+                    <a href="#write-review" class="btn-primary">Write a Review</a>
+                    {% endif %}
+                {% elif current_user.user_type == 'restaurant_owner' %}
+                    {% set owner = current_user.restaurant_owner %}
+                    {% if owner and restaurant.owner_id == owner.id %}
+                    <a href="{{ url_for('main.edit_restaurant', id=restaurant.id) }}" class="btn-primary">
+                        <i class="fas fa-edit"></i> Edit Restaurant
+                    </a>
+                    <button type="button" class="btn-danger" data-bs-toggle="modal" data-bs-target="#deleteRestaurantModal">
+                        <i class="fas fa-trash"></i> Delete Restaurant
+                    </button>
+                    {% endif %}
+                {% endif %}
+                <a href="{{ url_for('main.add_photo', id=restaurant.id) }}" class="btn-secondary">Add Photo</a>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="restaurant-content">
+        <div class="restaurant-main">
+            <div class="photo-gallery">
+                {% if photos %}
+                <div class="gallery-grid">
+                    {% for photo in photos %}
+                    <div class="gallery-item">
+                        <img src="{{ url_for('static', filename=photo.image_url) }}" alt="{{ photo.caption or restaurant.name }}" onerror="this.src='/static/img/default-restaurant.jpg'">
+                        {% if photo.caption %}
+                        <div class="caption">{{ photo.caption }}</div>
+                        {% endif %}
+                        {% if current_user.is_authenticated and (current_user.id == photo.uploaded_by or (current_user.user_type == 'owner' and current_user.restaurant_owner.id == restaurant.owner_id)) %}
+                        <div class="delete-photo">
+                            <form action="{{ url_for('main.delete_restaurant_photo', photo_id=photo.id) }}" method="POST">
+                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this photo?')">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            </form>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="no-photos">
+                    <i class="fas fa-camera"></i>
+                    <p>No photos available yet</p>
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="restaurant-description">
+                <h2>About</h2>
+                <p>{{ restaurant.description }}</p>
+            </div>
+            
+            <div class="menu-section">
+                <div class="menu-header">
+                    <h2>Menu</h2>
+                    {% if current_user.is_authenticated and current_user.user_type == 'restaurant_owner' %}
+                        {% set owner = current_user.restaurant_owner %}
+                        {% if owner and restaurant.owner_id == owner.id %}
+                        <a href="{{ url_for('main.add_menu_item', id=restaurant.id) }}" class="btn-primary">
+                            <i class="fas fa-plus me-1"></i> Add Menu Item
+                        </a>
+                        {% endif %}
+                    {% endif %}
+                </div>
+                
+                {% if menu_items %}
+                <div class="menu-items-grid">
+                    {% for item in menu_items %}
+                    <div class="menu-item-card">
+                        <a href="{{ url_for('main.menu_item_detail', id=item.id) }}" class="menu-item-link">
+                            <div class="menu-item-image">
+                                {% if item.image_url %}
+                                <img src="{{ url_for('static', filename=item.image_url) }}" alt="{{ item.name }}">
+                                {% else %}
+                                <div class="no-image">
+                                    <i class="fas fa-utensils"></i>
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="menu-item-content">
+                                <div class="menu-item-header">
+                                    <h3>{{ item.name }}</h3>
+                                    <div class="menu-item-price">{{ item.price }} MAD</div>
+                                </div>
+                                
+                                {% if item.description %}
+                                <p class="menu-item-description">{{ item.description|truncate(100) }}</p>
+                                {% endif %}
+                                
+                                <!-- Dietary badges -->
+                                <div class="menu-item-badges">
+                                    {% if item.is_vegetarian %}
+                                    <span class="badge bg-success">Vegetarian</span>
+                                    {% endif %}
+                                    
+                                    {% if item.is_vegan %}
+                                    <span class="badge bg-success">Vegan</span>
+                                    {% endif %}
+                                    
+                                    {% if item.is_gluten_free %}
+                                    <span class="badge bg-success">Gluten Free</span>
+                                    {% endif %}
+                                    
+                                    {% if item.spice_level > 0 %}
+                                    <span class="badge bg-danger">
+                                        {% for i in range(item.spice_level) %}🌶️{% endfor %}
+                                    </span>
+                                    {% endif %}
+                                </div>
+                                
+                                <!-- Rating -->
+                                {% if item.average_rating > 0 %}
+                                <div class="menu-item-rating">
+                                    {% for i in range(5) %}
+                                        {% if i < item.average_rating|int %}
+                                        <i class="fas fa-star text-warning"></i>
+                                        {% elif i < (item.average_rating + 0.5)|int %}
+                                        <i class="fas fa-star-half-alt text-warning"></i>
+                                        {% else %}
+                                        <i class="far fa-star text-warning"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                    <span class="rating-text">{{ item.average_rating }}</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </a>
+                        
+                        <!-- Edit button for restaurant owners -->
+                        {% if current_user.is_authenticated and current_user.user_type == 'restaurant_owner' %}
+                            {% set owner = current_user.restaurant_owner %}
+                            {% if owner and restaurant.owner_id == owner.id %}
+                            <div class="menu-item-actions">
+                                <a href="{{ url_for('main.edit_menu_item', id=item.id) }}" class="btn-edit">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                            </div>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-menu">
+                    <div class="empty-state">
+                        <i class="fas fa-utensils"></i>
+                        <p>No menu items available yet.</p>
+                        {% if current_user.is_authenticated and current_user.user_type == 'restaurant_owner' %}
+                            {% set owner = current_user.restaurant_owner %}
+                            {% if owner and restaurant.owner_id == owner.id %}
+                            <a href="{{ url_for('main.add_menu_item', id=restaurant.id) }}" class="btn-primary">Add Menu Item</a>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="reviews-section">
+                <h2>Reviews</h2>
+                {% if review_form %}
+                <div id="write-review" class="write-review">
+                    <h3>Write a Review</h3>
+                    <form method="POST" action="{{ url_for('main.add_review', id=restaurant.id) }}" enctype="multipart/form-data">
+                        {{ review_form.hidden_tag() }}
+                        <div class="form-group">
+                            {{ review_form.rating.label(class="form-label") }}
+                            {{ review_form.rating(class="form-control") }}
+                        </div>
+                        <div class="form-group">
+                            {{ review_form.comment.label(class="form-label") }}
+                            {{ review_form.comment(class="form-control", rows=4) }}
+                        </div>
+                        <div class="form-group">
+                            {{ review_form.images.label(class="form-label") }}
+                            {{ review_form.images(class="form-control", id="review-images") }}
+                            <div class="image-preview-container" id="image-preview-container"></div>
+                        </div>
+                        <div class="form-group">
+                            {{ review_form.submit(class="btn-primary") }}
+                        </div>
+                    </form>
+                </div>
+                
+                <script>
+                    // Image preview script
+                    document.getElementById('review-images').addEventListener('change', function(event) {
+                        const previewContainer = document.getElementById('image-preview-container');
+                        previewContainer.innerHTML = '';
+                        
+                        if (this.files) {
+                            Array.from(this.files).forEach(file => {
+                                if (file) {
+                                    const reader = new FileReader();
+                                    
+                                    reader.onload = function(e) {
+                                        const preview = document.createElement('div');
+                                        preview.className = 'image-preview';
+                                        
+                                        const img = document.createElement('img');
+                                        img.src = e.target.result;
+                                        
+                                        preview.appendChild(img);
+                                        previewContainer.appendChild(preview);
+                                    }
+                                    
+                                    reader.readAsDataURL(file);
+                                }
+                            });
+                        }
+                    });
+                </script>
+                {% endif %}
+                
+                {% if reviews %}
+                <div class="reviews-list">
+                    {% for review in reviews %}
+                    <div class="review-item">
+                        <div class="review-header">
+                            <div class="reviewer-info">
+                                {% if review.tourist.user.profile_image %}
+                                <img src="{{ url_for('static', filename=review.tourist.user.profile_image) }}" alt="{{ review.tourist.user.name }}" class="profile-pic-small">
+                                {% endif %}
+                                <span class="reviewer-name">{{ review.tourist.user.name }}</span>
+                                <span class="reviewer-country">{{ review.tourist.country }}</span>
+                            </div>
+                            <div class="review-rating">
+                                {% for i in range(5) %}
+                                    {% if i < review.rating %}
+                                    <i class="fas fa-star"></i>
+                                    {% else %}
+                                    <i class="far fa-star"></i>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="review-date">{{ review.date.strftime('%B %d, %Y') }}</div>
+                        <div class="review-content">{{ review.comment }}</div>
+                        
+                        {% if review.images %}
+                        <div class="review-image-gallery">
+                            <div class="review-image-gallery-title">Photos from this review:</div>
+                            <div class="review-images">
+                                {% for image in review.images %}
+                                <div class="review-image">
+                                    <img src="{{ url_for('static', filename=image.image_url) }}" alt="Review image" onerror="this.src='/static/img/default-restaurant.jpg'">
+                                    {% if current_user.is_authenticated and current_user.user_type == 'tourist' %}
+                                        {% set tourist = current_user.tourist %}
+                                        {% if tourist and review.tourist_id == tourist.id %}
+                                        <div class="delete-image">
+                                            <form action="{{ url_for('main.delete_review_image', image_id=image.id) }}" method="POST">
+                                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this image?')">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-reviews">
+                    <p>No reviews yet. Be the first to review this restaurant!</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="restaurant-sidebar">
+            <div class="sidebar-card info-card">
+                <h3>Restaurant Information</h3>
+                <div class="info-item">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span>{{ restaurant.location }}</span>
+                </div>
+                {% if restaurant.address %}
+                <div class="info-item">
+                    <i class="fas fa-map"></i>
+                    <span>{{ restaurant.address }}</span>
+                </div>
+                {% endif %}
+                <div class="info-item">
+                    <i class="fas fa-clock"></i>
+                    <span>{{ restaurant.open_time }} - {{ restaurant.close_time }}</span>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-phone"></i>
+                    <span>{{ restaurant.contact_number }}</span>
+                </div>
+                {% if restaurant.whatsapp_number %}
+                <div class="info-item">
+                    <i class="fab fa-whatsapp"></i>
+                    <span>{{ restaurant.whatsapp_number }}</span>
+                </div>
+                {% endif %}
+                <div class="info-item">
+                    <i class="fas fa-utensils"></i>
+                    <span>{{ restaurant.type }}</span>
+                </div>
+                {% if restaurant.price_range %}
+                <div class="info-item">
+                    <i class="fas fa-money-bill-wave"></i>
+                    <span>{{ restaurant.price_range }}</span>
+                </div>
+                {% endif %}
+                {% if restaurant.website or restaurant.instagram or restaurant.facebook %}
+                <div class="social-links">
+                    {% if restaurant.website %}
+                    <a href="{{ restaurant.website }}" target="_blank" class="social-link">
+                        <i class="fas fa-globe"></i>
+                    </a>
+                    {% endif %}
+                    {% if restaurant.instagram %}
+                    <a href="https://instagram.com/{{ restaurant.instagram }}" target="_blank" class="social-link">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                    {% endif %}
+                    {% if restaurant.facebook %}
+                    <a href="https://facebook.com/{{ restaurant.facebook }}" target="_blank" class="social-link">
+                        <i class="fab fa-facebook"></i>
+                    </a>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Restaurant Map -->
+            <div class="sidebar-card map-card">
+                <h3>Location</h3>
+                {% if restaurant.google_maps_link %}
+                    <div class="map-embed">
+                        <iframe 
+                            width="100%" 
+                            height="250" 
+                            frameborder="0" 
+                            style="border:0" 
+                            src="{{ restaurant.google_maps_link }}" 
+                            allowfullscreen>
+                        </iframe>
+                    </div>
+                {% elif restaurant.latitude and restaurant.longitude %}
+                    <div id="restaurant-map" style="width: 100%; height: 250px;"></div>
+                    <script>
+                        function initMap() {
+                            // Get latitude and longitude from data attributes to avoid template syntax issues
+                            var lat = parseFloat(document.getElementById('restaurant-map').getAttribute('data-lat'));
+                            var lng = parseFloat(document.getElementById('restaurant-map').getAttribute('data-lng'));
+                            var restaurantName = document.getElementById('restaurant-map').getAttribute('data-name');
+                            
+                            var restaurantLocation = {
+                                lat: lat,
+                                lng: lng
+                            };
+                            
+                            var mapOptions = {
+                                zoom: 15,
+                                center: restaurantLocation
+                            };
+                            
+                            var map = new google.maps.Map(
+                                document.getElementById('restaurant-map'),
+                                mapOptions
+                            );
+                            
+                            var markerOptions = {
+                                position: restaurantLocation,
+                                map: map,
+                                title: restaurantName
+                            };
+                            
+                            var marker = new google.maps.Marker(markerOptions);
+                        }
+                    </script>
+                    <script async defer
+                        src="https://maps.googleapis.com/maps/api/js?key={{ config.GOOGLE_MAPS_API_KEY }}&callback=initMap">
+                    </script>
+                    
+                    <!-- Add data attributes to the map div -->
+                    <script>
+                        document.getElementById('restaurant-map').setAttribute('data-lat', '{{ restaurant.latitude }}');
+                        document.getElementById('restaurant-map').setAttribute('data-lng', '{{ restaurant.longitude }}');
+                        document.getElementById('restaurant-map').setAttribute('data-name', '{{ restaurant.name }}');
+                    </script>
+                {% else %}
+                    <p class="text-muted">No map location available</p>
+                {% endif %}
+                <div class="map-actions">
+                    <a href="https://www.google.com/maps/search/?api=1&query={{ restaurant.name }}+{{ restaurant.location }}+Agadir" target="_blank" class="btn-text">
+                        <i class="fas fa-directions"></i> Get Directions
+                    </a>
+                </div>
+            </div>
+            
+            <div class="sidebar-card owner-card">
+                <h3>Restaurant Owner</h3>
+                <div class="owner-info">
+                    <p>{{ restaurant.owner.user.name }}</p>
+                    <p><small>Member since {{ restaurant.owner.user.created_at.strftime('%B %Y') }}</small></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Restaurant Confirmation Modal -->
+<div class="modal fade" id="deleteRestaurantModal" tabindex="-1" aria-labelledby="deleteRestaurantModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteRestaurantModalLabel">Confirm Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete <strong>{{ restaurant.name }}</strong>? This action cannot be undone.</p>
+                <p>All associated menu items, reviews, and photos will also be deleted.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form action="{{ url_for('main.delete_restaurant', id=restaurant.id) }}" method="POST">
+                    <button type="submit" class="btn-danger">Delete Restaurant</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

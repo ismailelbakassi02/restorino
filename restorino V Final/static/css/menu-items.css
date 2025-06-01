@@ -1,0 +1,324 @@
+/* Menu Items Styles */
+
+/* Menu Section Header */
+.menu-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+/* Menu Items Grid Layout */
+.menu-items-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+/* Menu Item Card */
+.menu-item-card {
+    border: 1px solid var(--light-gray);
+    border-radius: 8px;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+    position: relative;
+    background-color: var(--white);
+}
+
+.menu-item-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.menu-item-link {
+    display: block;
+    color: inherit;
+    text-decoration: none;
+}
+
+/* Menu Item Image */
+.menu-item-image {
+    height: 180px;
+    overflow: hidden;
+    position: relative;
+}
+
+.menu-item-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s;
+}
+
+.menu-item-card:hover .menu-item-image img {
+    transform: scale(1.05);
+}
+
+.no-image {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--off-white);
+    color: var(--gray);
+}
+
+.no-image i {
+    font-size: 3rem;
+}
+
+/* Menu Item Content */
+.menu-item-content {
+    padding: 1rem;
+}
+
+.menu-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.5rem;
+}
+
+.menu-item-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.menu-item-price {
+    font-weight: 600;
+    color: var(--primary-color);
+    white-space: nowrap;
+}
+
+.menu-item-description {
+    margin: 0.5rem 0;
+    color: var(--light-text);
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+/* Dietary Badges */
+.menu-item-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0.5rem 0;
+}
+
+.menu-item-badges .badge {
+    font-size: 0.7rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+}
+
+/* Rating Stars */
+.menu-item-rating {
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.menu-item-rating i {
+    color: #ffc107;
+}
+
+.rating-text {
+    margin-left: 0.25rem;
+    font-weight: 500;
+}
+
+/* Edit Button */
+.menu-item-actions {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    z-index: 2;
+}
+
+.btn-edit {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background-color: var(--white);
+    border-radius: 50%;
+    color: var(--primary-color);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.2s;
+}
+
+.btn-edit:hover {
+    background-color: var(--primary-color);
+    color: var(--white);
+}
+
+/* Empty Menu State */
+.empty-menu {
+    padding: 3rem 0;
+}
+
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: var(--light-text);
+}
+
+.empty-state i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.empty-state p {
+    margin-bottom: 1.5rem;
+}
+
+/* Menu Item Detail Page */
+.menu-item-detail-image {
+    max-height: 400px;
+    width: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.menu-item-detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.menu-item-detail-price {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.dietary-info {
+    margin: 1.5rem 0;
+}
+
+.dietary-info-title {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.dietary-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.spice-level {
+    margin-top: 1rem;
+}
+
+.spice-level-indicator {
+    display: flex;
+    align-items: center;
+}
+
+.spice-level-indicator i {
+    color: var(--primary-color);
+    margin-right: 0.25rem;
+}
+
+/* Reviews Section */
+.review-form {
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--light-gray);
+}
+
+.review-item {
+    padding: 1rem;
+    border-radius: 8px;
+    background-color: var(--off-white);
+    margin-bottom: 1rem;
+}
+
+.review-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+}
+
+.reviewer-name {
+    font-weight: 600;
+}
+
+.review-date {
+    font-size: 0.8rem;
+    color: var(--light-text);
+    margin-bottom: 0.5rem;
+}
+
+.review-rating {
+    color: #ffc107;
+}
+
+/* Other Menu Items Section */
+.other-items-title {
+    margin-bottom: 1rem;
+}
+
+.other-item {
+    display: flex;
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--light-gray);
+}
+
+.other-item:last-child {
+    border-bottom: none;
+}
+
+.other-item-image {
+    width: 60px;
+    height: 60px;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-right: 1rem;
+}
+
+.other-item-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.other-item-content {
+    flex: 1;
+}
+
+.other-item-name {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.other-item-price {
+    color: var(--primary-color);
+    font-weight: 500;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .menu-items-grid {
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    }
+    
+    .menu-item-image {
+        height: 150px;
+    }
+}
+
+@media (max-width: 576px) {
+    .menu-items-grid {
+        grid-template-columns: 1fr;
+    }
+}

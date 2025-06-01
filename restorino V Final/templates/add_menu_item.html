@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% block title %}Add Menu Item - {{ restaurant.name }} - Restorino{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <div class="form-header">
+        <h1>Add Menu Item</h1>
+        <p>Add a new dish to your restaurant "{{ restaurant.name }}"</p>
+    </div>
+    
+    <div class="form-card">
+        <form method="POST" action="{{ url_for('main.add_menu_item', id=restaurant.id) }}" enctype="multipart/form-data">
+            {{ form.hidden_tag() }}
+            
+            <div class="form-group">
+                {{ form.name.label(class="form-label") }}
+                {% if form.name.errors %}
+                    {{ form.name(class="form-control is-invalid") }}
+                    <div class="invalid-feedback">
+                        {% for error in form.name.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.name(class="form-control") }}
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                {{ form.description.label(class="form-label") }}
+                {% if form.description.errors %}
+                    {{ form.description(class="form-control is-invalid", rows=3) }}
+                    <div class="invalid-feedback">
+                        {% for error in form.description.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.description(class="form-control", rows=3, placeholder="Describe the dish, ingredients, etc.") }}
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                {{ form.price.label(class="form-label") }}
+                {% if form.price.errors %}
+                    {{ form.price(class="form-control is-invalid") }}
+                    <div class="invalid-feedback">
+                        {% for error in form.price.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.price(class="form-control", placeholder="Price in MAD") }}
+                {% endif %}
+                <small class="form-text text-muted">Enter the price in Moroccan Dirham (MAD)</small>
+            </div>
+            
+            <div class="form-group">
+                {{ form.photo.label(class="form-label") }}
+                {% if form.photo.errors %}
+                    {{ form.photo(class="form-control is-invalid") }}
+                    <div class="invalid-feedback">
+                        {% for error in form.photo.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.photo(class="form-control") }}
+                {% endif %}
+                <small class="form-text text-muted">Upload a photo of the dish (jpg, jpeg, png, gif)</small>
+            </div>
+            
+            <div class="form-group">
+                {{ form.ingredients.label(class="form-label") }}
+                {% if form.ingredients.errors %}
+                    {{ form.ingredients(class="form-control is-invalid", rows=2) }}
+                    <div class="invalid-feedback">
+                        {% for error in form.ingredients.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.ingredients(class="form-control", rows=2, placeholder="List ingredients separated by commas") }}
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                {{ form.preparation_time.label(class="form-label") }}
+                {% if form.preparation_time.errors %}
+                    {{ form.preparation_time(class="form-control is-invalid") }}
+                    <div class="invalid-feedback">
+                        {% for error in form.preparation_time.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.preparation_time(class="form-control", placeholder="e.g., 15-20 min") }}
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Dietary Options</label>
+                <div class="checkbox-group">
+                    <div class="form-check">
+                        {{ form.is_vegetarian(class="form-check-input") }}
+                        {{ form.is_vegetarian.label(class="form-check-label") }}
+                    </div>
+                    <div class="form-check">
+                        {{ form.is_vegan(class="form-check-input") }}
+                        {{ form.is_vegan.label(class="form-check-label") }}
+                    </div>
+                    <div class="form-check">
+                        {{ form.is_gluten_free(class="form-check-input") }}
+                        {{ form.is_gluten_free.label(class="form-check-label") }}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                {{ form.spice_level.label(class="form-label") }}
+                {% if form.spice_level.errors %}
+                    {{ form.spice_level(class="form-control is-invalid") }}
+                    <div class="invalid-feedback">
+                        {% for error in form.spice_level.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.spice_level(class="form-control") }}
+                {% endif %}
+            </div>
+            
+            <div class="form-actions">
+                <a href="{{ url_for('main.restaurant_detail', id=restaurant.id) }}" class="btn-secondary">Cancel</a>
+                {{ form.submit(class="btn-primary") }}
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

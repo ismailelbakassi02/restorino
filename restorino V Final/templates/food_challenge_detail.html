@@ -1,0 +1,598 @@
+{% extends "base.html" %}
+
+{% block title %}{{ challenge.name }} Challenge{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Challenge Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="challenge-header card shadow">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-3 text-center">
+                            {% if challenge.image_url %}
+                            <img src="{{ url_for('static', filename='uploads/challenges/' + challenge.image_url) }}" class="img-fluid challenge-badge-img rounded-circle" alt="{{ challenge.name }}">
+                            {% else %}
+                            <img src="https://via.placeholder.com/200?text=Challenge" class="img-fluid challenge-badge-img rounded-circle" alt="{{ challenge.name }}">
+                            {% endif %}
+                        </div>
+                        <div class="col-md-9">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h1 class="mb-0">{{ challenge.name }}</h1>
+                                <span class="badge {% if challenge.difficulty_level <= 2 %}bg-success{% elif challenge.difficulty_level <= 4 %}bg-warning text-dark{% else %}bg-danger{% endif %}">
+                                    Difficulty Level {{ challenge.difficulty_level }}
+                                </span>
+                            </div>
+                            <p class="lead">{{ challenge.description }}</p>
+                            <div class="challenge-stats d-flex flex-wrap">
+                                <div class="me-4 mb-2">
+                                    <i class="fas fa-users me-1"></i> {{ participants|length }} participants
+                                </div>
+                                <div class="me-4 mb-2">
+                                    <i class="fas fa-trophy me-1"></i> {{ challenge.completion_count }} completed
+                                </div>
+                                <div class="me-4 mb-2">
+                                    <i class="fas fa-share-alt me-1"></i> {{ challenge.social_share_count }} shares
+                                </div>
+                                <div class="mb-2">
+                                    <i class="fas fa-award me-1"></i> Badge: {{ challenge.badge_reward }}
+                                </div>
+                            </div>
+                            
+                            {% if not user_progress and current_user.is_authenticated and current_user.user_type == 'tourist' %}
+                            <form method="POST" action="">
+                                {{ join_form.hidden_tag() }}
+                                <input type="hidden" name="action" value="join">
+                                {{ join_form.submit(class="btn btn-primary mt-3") }}
+                            </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Progress (if participating) -->
+    {% if user_progress %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">Your Progress</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h4 class="mb-3">Challenge Progress: {{ user_progress.progress }}%</h4>
+                            <div class="progress mb-4" style="height: 25px;">
+                                <div class="progress-bar bg-success progress-bar-striped progress-bar-animated" 
+                                     role="progressbar" 
+                                     style="width: {{ user_progress.progress }}%;" 
+                                     aria-valuenow="{{ user_progress.progress }}" 
+                                     aria-valuemin="0" 
+                                     aria-valuemax="100">
+                                    {{ user_progress.progress }}%
+                                </div>
+                            </div>
+                            
+                            {% if user_progress.completed %}
+                            <div class="alert alert-success">
+                                <h5><i class="fas fa-trophy me-2"></i>Congratulations!</h5>
+                                <p>You've completed this challenge on {{ user_progress.completed_at.strftime('%Y-%m-%d') }}!</p>
+                                <p>You've earned the <strong>{{ challenge.badge_reward }}</strong> badge!</p>
+                            </div>
+                            {% else %}
+                            <form method="POST" action="" enctype="multipart/form-data">
+                                {{ progress_form.hidden_tag() }}
+                                <input type="hidden" name="action" value="update">
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            {{ progress_form.progress_update.label(class="form-label") }}
+                                            {{ progress_form.progress_update(class="form-control", min="0", max="100", value=user_progress.progress) }}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            {{ progress_form.proof_image.label(class="form-label") }}
+                                            {{ progress_form.proof_image(class="form-control") }}
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group mb-3">
+                                    {{ progress_form.comments.label(class="form-label") }}
+                                    {{ progress_form.comments(class="form-control", rows="3", placeholder="Share your experience with this challenge step...") }}
+                                </div>
+                                
+                                <div class="form-group mb-3">
+                                    <label class="form-label">Share on Social Media</label>
+                                    <div class="social-share-buttons d-flex gap-2 mb-3">
+                                        <a href="https://www.instagram.com/share?url={{ request.url }}" target="_blank" class="btn btn-outline-danger">
+                                            <i class="fab fa-instagram"></i> Instagram
+                                        </a>
+                                        <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.url }}" target="_blank" class="btn btn-outline-primary">
+                                            <i class="fab fa-facebook"></i> Facebook
+                                        </a>
+                                        <a href="https://twitter.com/intent/tweet?url={{ request.url }}&text=I'm%20taking%20the%20{{ challenge.name }}%20challenge%20on%20Restorino!" target="_blank" class="btn btn-outline-info">
+                                            <i class="fab fa-twitter"></i> Twitter
+                                        </a>
+                                    </div>
+                                    
+                                    <div class="form-group mb-3">
+                                        <label class="form-label">Instagram Post URL (optional)</label>
+                                        <input type="text" class="form-control" name="social_post_url" placeholder="Paste your Instagram post URL here">
+                                        <small class="form-text text-muted">Share your post URL to earn extra points!</small>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-check mb-3">
+                                    {{ progress_form.share_socially(class="form-check-input") }}
+                                    {{ progress_form.share_socially.label(class="form-check-label") }}
+                                </div>
+                                
+                                <div class="form-group">
+                                    {{ progress_form.submit(class="btn btn-primary") }}
+                                </div>
+                            </form>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4 text-center">
+                            {% if user_progress.completed %}
+                            <div class="badge-container">
+                                <img src="{{ url_for('static', filename='uploads/challenges/' + challenge.image_url) if challenge.image_url else 'https://via.placeholder.com/200?text=Badge' }}" 
+                                     class="img-fluid rounded-circle mb-2" alt="{{ challenge.badge_reward }}">
+                                <h5>{{ challenge.badge_reward }}</h5>
+                                <p class="text-muted">Earned on {{ user_progress.completed_at.strftime('%Y-%m-%d') }}</p>
+                                
+                                <div class="social-share mt-3">
+                                    <p>Share your achievement:</p>
+                                    <a href="#" class="btn btn-sm btn-outline-primary me-2"><i class="fab fa-facebook-f"></i></a>
+                                    <a href="#" class="btn btn-sm btn-outline-info me-2"><i class="fab fa-twitter"></i></a>
+                                    <a href="#" class="btn btn-sm btn-outline-danger"><i class="fab fa-instagram"></i></a>
+                                </div>
+                            </div>
+                            {% else %}
+                            <div class="challenge-tips">
+                                <h5>Challenge Tips</h5>
+                                <ul class="list-group">
+                                    <li class="list-group-item">Take photos of each dish you try</li>
+                                    <li class="list-group-item">Ask for recommendations from locals</li>
+                                    <li class="list-group-item">Update your progress regularly</li>
+                                    <li class="list-group-item">Share your experience on social media</li>
+                                </ul>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Challenge Participants -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">Challenge Participants</h3>
+                </div>
+                <div class="card-body">
+                    {% if participants %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Participant</th>
+                                    <th>Progress</th>
+                                    <th>Status</th>
+                                    <th>Joined</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for participant in participants %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            {% if participant.tourist.user.profile_image %}
+                                            <img src="{{ url_for('static', filename=participant.tourist.user.profile_image) }}" class="rounded-circle me-2" width="40" height="40" alt="{{ participant.tourist.user.name }}">
+                                            {% else %}
+                                            <img src="https://via.placeholder.com/40?text={{ participant.tourist.user.name[0] }}" class="rounded-circle me-2" width="40" height="40" alt="{{ participant.tourist.user.name }}">
+                                            {% endif %}
+                                            <div>
+                                                <div>
+                                                    <a href="{{ url_for('main.user_profile', user_id=participant.tourist.user.id) }}" class="text-decoration-none fw-bold">{{ participant.tourist.user.name }}</a>
+                                                    {% if participant.tourist.instagram %}
+                                                    <a href="https://instagram.com/{{ participant.tourist.instagram }}" target="_blank" class="text-decoration-none ms-1"><i class="fab fa-instagram text-danger"></i></a>
+                                                    {% endif %}
+                                                </div>
+                                                <small class="text-muted">{{ participant.tourist.country }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td style="width: 30%;">
+                                        <div class="progress" style="height: 20px;">
+                                            <div class="progress-bar bg-success" 
+                                                 role="progressbar" 
+                                                 style="width: {{ participant.progress }}%;" 
+                                                 aria-valuenow="{{ participant.progress }}" 
+                                                 aria-valuemin="0" 
+                                                 aria-valuemax="100">
+                                            {{ participant.progress }}%
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {% if participant.completed %}
+                                        <span class="badge bg-success">Completed</span>
+                                        {% else %}
+                                        <span class="badge bg-primary">In Progress</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{% if participant.created_at %}{{ participant.created_at.strftime('%Y-%m-%d') }}{% else %}N/A{% endif %}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info">
+                        <p>No participants yet. Be the first to join this challenge!</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Community Posts -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h3 class="mb-0">Community Posts</h3>
+                    {% if user_progress and user_progress.completed %}
+                    <button class="btn btn-light" data-bs-toggle="modal" data-bs-target="#newPostModal">
+                        <i class="fas fa-plus-circle"></i> Share Your Experience
+                    </button>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    {% if challenge_posts %}
+                    <div class="challenge-posts">
+                        {% for post in challenge_posts %}
+                        <div class="challenge-post card mb-4">
+                            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    {% if post.participant.tourist.user.profile_image %}
+                                    <img src="{{ url_for('static', filename=post.participant.tourist.user.profile_image) }}" class="rounded-circle me-2" width="40" height="40" alt="{{ post.participant.tourist.user.name }}">
+                                    {% else %}
+                                    <img src="https://via.placeholder.com/40?text={{ post.participant.tourist.user.name[0] }}" class="rounded-circle me-2" width="40" height="40" alt="{{ post.participant.tourist.user.name }}">
+                                    {% endif %}
+                                    <div>
+                                        <div>
+                                            <a href="{{ url_for('main.user_profile', user_id=post.participant.tourist.user.id) }}" class="text-decoration-none fw-bold">{{ post.participant.tourist.user.name }}</a>
+                                            {% if post.participant.tourist.instagram %}
+                                            <a href="https://instagram.com/{{ post.participant.tourist.instagram }}" target="_blank" class="text-decoration-none ms-1"><i class="fab fa-instagram text-danger"></i></a>
+                                            {% endif %}
+                                        </div>
+                                        <small class="text-muted">{{ post.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                                    </div>
+                                </div>
+                                <div>
+                                    <span class="badge bg-success"><i class="fas fa-trophy"></i> Completed</span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <p class="card-text">{{ post.content }}</p>
+                                {% if post.image_url %}
+                                <div class="post-image mb-3">
+                                    <img src="{{ url_for('static', filename='uploads/challenges/' + post.image_url) }}" class="img-fluid rounded" alt="Challenge proof">
+                                </div>
+                                {% endif %}
+                                
+                                {% if post.participant.social_post_url %}
+                                <div class="instagram-embed mb-3">
+                                    <a href="{{ post.participant.social_post_url }}" target="_blank" class="btn btn-outline-danger btn-sm">
+                                        <i class="fab fa-instagram"></i> View on Instagram
+                                    </a>
+                                </div>
+                                {% endif %}
+                                
+                                <div class="post-actions d-flex align-items-center">
+                                    <button class="btn btn-sm btn-outline-primary me-2 like-button" data-post-id="{{ post.id }}">
+                                        <i class="far fa-thumbs-up"></i> Like ({{ post.likes_count }})
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-secondary comment-toggle" data-post-id="{{ post.id }}">
+                                        <i class="far fa-comment"></i> Comments ({{ post.comments|length }})
+                                    </button>
+                                </div>
+                                
+                                <div class="comments-section mt-3" id="comments-{{ post.id }}" style="display: none;">
+                                    <hr>
+                                    <h6>Comments</h6>
+                                    <div class="comments-list mb-3">
+                                        {% if post.comments %}
+                                            {% for comment in post.comments %}
+                                            <div class="comment d-flex mb-2">
+                                                {% if comment.tourist.user.profile_image %}
+                                                <img src="{{ url_for('static', filename=comment.tourist.user.profile_image) }}" class="rounded-circle me-2" width="30" height="30" alt="{{ comment.tourist.user.name }}">
+                                                {% else %}
+                                                <img src="https://via.placeholder.com/30?text={{ comment.tourist.user.name[0] }}" class="rounded-circle me-2" width="30" height="30" alt="{{ comment.tourist.user.name }}">
+                                                {% endif %}
+                                                <div>
+                                                    <div class="d-flex align-items-center">
+                                                        <a href="{{ url_for('main.user_profile', user_id=comment.tourist.user.id) }}" class="text-decoration-none fw-bold me-2">{{ comment.tourist.user.name }}</a>
+                                                        <small class="text-muted">{{ comment.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                                                    </div>
+                                                    <p class="mb-0">{{ comment.content }}</p>
+                                                </div>
+                                            </div>
+                                            {% endfor %}
+                                        {% else %}
+                                            <p class="text-muted">No comments yet. Be the first to comment!</p>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    {% if current_user.is_authenticated and current_user.user_type == 'tourist' %}
+                                    <form class="comment-form" action="{{ url_for('main.add_challenge_comment') }}" method="post">
+                                        <input type="hidden" name="post_id" value="{{ post.id }}">
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" name="content" placeholder="Add a comment..." required>
+                                            <button class="btn btn-primary" type="submit">Post</button>
+                                        </div>
+                                    </form>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info">
+                        <p>No community posts yet. Complete the challenge and be the first to share your experience!</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recommended Restaurants -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">Recommended Restaurants for this Challenge</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <!-- This would be populated dynamically based on the challenge type -->
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100">
+                                <img src="https://via.placeholder.com/300x200?text=Restaurant" class="card-img-top" alt="Restaurant">
+                                <div class="card-body">
+                                    <h5 class="card-title">Café Maroc</h5>
+                                    <p class="card-text">Traditional Moroccan cuisine with authentic tagines.</p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <i class="fas fa-star text-warning"></i>
+                                            <i class="fas fa-star text-warning"></i>
+                                            <i class="fas fa-star text-warning"></i>
+                                            <i class="fas fa-star text-warning"></i>
+                                            <i class="fas fa-star-half-alt text-warning"></i>
+                                            <span class="ms-1">4.5</span>
+                                        </div>
+                                        <span class="badge bg-info text-dark">Agadir Marina</span>
+                                    </div>
+                                </div>
+                                <div class="card-footer">
+                                    <a href="#" class="btn btn-sm btn-primary">View Restaurant</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100">
+                                <img src="https://via.placeholder.com/300x200?text=Restaurant" class="card-img-top" alt="Restaurant">
+                                <div class="card-body">
+                                    <h5 class="card-title">Port Restaurant</h5>
+                                    <p class="card-text">Fresh seafood caught daily from Agadir's fishing port.</p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <i class="fas fa-star text-warning"></i>
+                                            <i class="fas fa-star text-warning"></i>
+                                            <i class="fas fa-star text-warning"></i>
+                                            <i class="fas fa-star text-warning"></i>
+                                            <i class="far fa-star text-warning"></i>
+                                            <span class="ms-1">4.0</span>
+                                        </div>
+                                        <span class="badge bg-info text-dark">Agadir Beach</span>
+                                    </div>
+                                </div>
+                                <div class="card-footer">
+                                    <a href="#" class="btn btn-sm btn-primary">View Restaurant</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100">
+                                <img src="https://via.placeholder.com/300x200?text=Restaurant" class="card-img-top" alt="Restaurant">
+                                <div class="card-body">
+                                    <h5 class="card-title">Berber Traditions</h5>
+                                    <p class="card-text">Authentic Berber cuisine with traditional cooking methods.</p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <i class="fas fa-star text-warning"></i>
+                                            <i class="fas fa-star text-warning"></i>
+                                            <i class="fas fa-star text-warning"></i>
+                                            <i class="fas fa-star text-warning"></i>
+                                            <i class="fas fa-star text-warning"></i>
+                                            <span class="ms-1">5.0</span>
+                                        </div>
+                                        <span class="badge bg-info text-dark">Talborjt</span>
+                                    </div>
+                                </div>
+                                <div class="card-footer">
+                                    <a href="#" class="btn btn-sm btn-primary">View Restaurant</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- New Post Modal -->
+<div class="modal fade" id="newPostModal" tabindex="-1" aria-labelledby="newPostModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="newPostModalLabel">Share Your Challenge Experience</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="{{ url_for('main.add_challenge_post') }}" method="post" enctype="multipart/form-data">
+                    <input type="hidden" name="participant_id" value="{{ user_progress.id }}">
+                    <input type="hidden" name="challenge_id" value="{{ challenge.id }}">
+                    
+                    <div class="form-group mb-3">
+                        <label for="postContent" class="form-label">Your Experience</label>
+                        <textarea class="form-control" id="postContent" name="content" rows="4" placeholder="Share your experience completing this challenge..." required></textarea>
+                    </div>
+                    
+                    <div class="form-group mb-3">
+                        <label for="postImage" class="form-label">Upload Image (optional)</label>
+                        <input type="file" class="form-control" id="postImage" name="image" accept="image/*">
+                        <small class="form-text text-muted">Share a photo of your completed challenge!</small>
+                    </div>
+                    
+                    <div class="form-group mb-3">
+                        <label for="socialPostUrl" class="form-label">Social Media Post URL (optional)</label>
+                        <input type="text" class="form-control" id="socialPostUrl" name="social_post_url" placeholder="Paste your Instagram, Facebook, or Twitter post URL here">
+                        <small class="form-text text-muted">Link to your social media post about this challenge</small>
+                    </div>
+                    
+                    <div class="d-flex justify-content-end">
+                        <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Share Post</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block styles %}
+<style>
+    .challenge-header {
+        border-top: 5px solid #d32323;
+    }
+    
+    .challenge-badge-img {
+        max-width: 150px;
+        border: 5px solid #fff;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .badge-container {
+        padding: 20px;
+        background-color: #f8f9fa;
+        border-radius: 10px;
+    }
+    
+    .badge-container img {
+        max-width: 150px;
+        border: 5px solid #fff;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .social-share-buttons .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+    }
+    
+    .challenge-post {
+        border: none;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        transition: transform 0.2s;
+    }
+    
+    .challenge-post:hover {
+        transform: translateY(-3px);
+    }
+    
+    .post-image img {
+        max-height: 400px;
+        object-fit: cover;
+        width: 100%;
+    }
+    
+    .comments-section {
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        padding: 15px;
+    }
+    
+    .comment {
+        padding: 8px;
+        border-radius: 8px;
+    }
+    
+    .comment:hover {
+        background-color: #f0f0f0;
+    }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Toggle comments section
+    document.querySelectorAll('.comment-toggle').forEach(function(button) {
+        button.addEventListener('click', function() {
+            const postId = this.getAttribute('data-post-id');
+            const commentsSection = document.getElementById('comments-' + postId);
+            if (commentsSection.style.display === 'none') {
+                commentsSection.style.display = 'block';
+                this.innerHTML = '<i class="fas fa-comment"></i> Hide Comments';
+            } else {
+                commentsSection.style.display = 'none';
+                this.innerHTML = '<i class="far fa-comment"></i> Comments';
+            }
+        });
+    });
+    
+    // Like button functionality
+    document.querySelectorAll('.like-button').forEach(function(button) {
+        button.addEventListener('click', function() {
+            const postId = this.getAttribute('data-post-id');
+            // Send AJAX request to like the post
+            fetch('/like-challenge-post/' + postId, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': window.csrfToken
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update like count
+                    this.innerHTML = '<i class="fas fa-thumbs-up"></i> Like (' + data.likes_count + ')';
+                    this.classList.remove('btn-outline-primary');
+                    this.classList.add('btn-primary');
+                }
+            });
+        });
+    });
+});
+</script>
+{% endblock %}

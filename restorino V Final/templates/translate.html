@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}Translate Content{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">
+                        <i class="fas fa-language me-2"></i>Multilingual Translation
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <h4 class="mb-3">Original Content</h4>
+                    <div class="original-content p-3 mb-4 bg-light rounded">
+                        {{ original_text }}
+                    </div>
+
+                    <h4 class="mb-3">Add Translation</h4>
+                    <form method="POST" action="">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="form-group mb-3">
+                            {{ form.language.label(class="form-label") }}
+                            {{ form.language(class="form-select") }}
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            {{ form.original_text.label(class="form-label") }}
+                            {{ form.original_text(class="form-control", rows=3) }}
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            {{ form.translated_text.label(class="form-label") }}
+                            {{ form.translated_text(class="form-control", rows=5) }}
+                        </div>
+                        
+                        <div class="form-group">
+                            {{ form.submit(class="btn btn-primary") }}
+                            <a href="{{ url_for('main.index') }}" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+
+                    {% if existing_translations %}
+                    <hr class="my-4">
+                    <h4 class="mb-3">Existing Translations</h4>
+                    <div class="list-group">
+                        {% for translation in existing_translations %}
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">
+                                    {% for code, name in config.LANGUAGES %}
+                                        {% if code == translation.language %}
+                                            {{ name }}
+                                        {% endif %}
+                                    {% endfor %}
+                                </h5>
+                                <small>
+                                    {% if translation.is_verified %}
+                                    <span class="badge bg-success">Verified</span>
+                                    {% else %}
+                                    <span class="badge bg-warning text-dark">Pending Verification</span>
+                                    {% endif %}
+                                </small>
+                            </div>
+                            <p class="mb-1">{{ translation.translated_text }}</p>
+                            <small class="text-muted">Added {{ translation.created_at.strftime('%Y-%m-%d') }}</small>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Add any JavaScript needed for the translation page
+    document.addEventListener('DOMContentLoaded', function() {
+        // Auto-resize textareas as user types
+        const textareas = document.querySelectorAll('textarea');
+        textareas.forEach(textarea => {
+            textarea.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = (this.scrollHeight) + 'px';
+            });
+        });
+    });
+</script>
+{% endblock %}

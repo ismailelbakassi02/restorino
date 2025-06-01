@@ -1,0 +1,336 @@
+{% extends "base.html" %}
+
+{% block title %}{{ restaurant.name }} - Impact Reports{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Restaurant Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h2 class="mb-0">{{ restaurant.name }} - Impact Reports</h2>
+                        <span class="badge bg-primary">{{ restaurant.type }}</span>
+                    </div>
+                    <p class="text-muted">{{ restaurant.location }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Impact Visualization -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">Impact Trends</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <h4 class="text-center mb-3">Revenue Growth</h4>
+                            <canvas id="revenueChart"></canvas>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <h4 class="text-center mb-3">Tourist Visits</h4>
+                            <canvas id="visitsChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-6 mb-4">
+                            <h4 class="text-center mb-3">Jobs Created</h4>
+                            <canvas id="jobsChart"></canvas>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <h4 class="text-center mb-3">Local Partnerships</h4>
+                            <canvas id="partnershipsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add New Impact Report -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">Add Impact Report</h3>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    {{ form.month_year.label(class="form-label") }}
+                                    {{ form.month_year(class="form-control", placeholder="YYYY-MM") }}
+                                    <small class="form-text text-muted">Format: YYYY-MM (e.g., 2025-05)</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    {{ form.tourist_visits_increase.label(class="form-label") }}
+                                    {{ form.tourist_visits_increase(class="form-control", type="number", min="0") }}
+                                    <small class="form-text text-muted">Percentage increase compared to previous month</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    {{ form.revenue_boost_percentage.label(class="form-label") }}
+                                    {{ form.revenue_boost_percentage(class="form-control", type="number", step="0.1", min="0") }}
+                                    <small class="form-text text-muted">Percentage increase compared to previous month</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    {{ form.jobs_created.label(class="form-label") }}
+                                    {{ form.jobs_created(class="form-control", type="number", min="0") }}
+                                    <small class="form-text text-muted">New jobs created this month</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            {{ form.local_supplier_partnerships.label(class="form-label") }}
+                            {{ form.local_supplier_partnerships(class="form-control", type="number", min="0") }}
+                            <small class="form-text text-muted">Number of local supplier partnerships</small>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            {{ form.impact_story.label(class="form-label") }}
+                            {{ form.impact_story(class="form-control", rows=3, placeholder="Share a success story or notable impact from this month...") }}
+                        </div>
+                        
+                        <div class="form-group">
+                            {{ form.submit(class="btn btn-primary") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Impact Reports History -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">Impact Reports History</h3>
+                </div>
+                <div class="card-body">
+                    {% if impact_reports %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Month</th>
+                                    <th>Tourist Visits Increase</th>
+                                    <th>Revenue Boost</th>
+                                    <th>Jobs Created</th>
+                                    <th>Local Partnerships</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for report in impact_reports %}
+                                <tr>
+                                    <td>{{ report.month_year }}</td>
+                                    <td>+{{ report.tourist_visits_increase }}%</td>
+                                    <td>+{{ report.revenue_boost_percentage }}%</td>
+                                    <td>{{ report.jobs_created }}</td>
+                                    <td>{{ report.local_supplier_partnerships }}</td>
+                                    <td>
+                                        <button type="button" class="btn btn-sm btn-primary edit-report" 
+                                                data-month="{{ report.month_year }}"
+                                                data-visits="{{ report.tourist_visits_increase }}"
+                                                data-revenue="{{ report.revenue_boost_percentage }}"
+                                                data-jobs="{{ report.jobs_created }}"
+                                                data-partnerships="{{ report.local_supplier_partnerships }}">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i> No impact reports have been submitted for this restaurant yet.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Prepare data for charts
+    const months = [];
+    const revenueData = [];
+    const visitsData = [];
+    const jobsData = [];
+    const partnershipsData = [];
+    
+    {% for report in impact_reports %}
+    months.push('{{ report.month_year }}');
+    revenueData.push({{ report.revenue_boost_percentage }});
+    visitsData.push({{ report.tourist_visits_increase }});
+    jobsData.push({{ report.jobs_created }});
+    partnershipsData.push({{ report.local_supplier_partnerships }});
+    {% endfor %}
+    
+    // Reverse arrays to show chronological order
+    months.reverse();
+    revenueData.reverse();
+    visitsData.reverse();
+    jobsData.reverse();
+    partnershipsData.reverse();
+    
+    // Revenue Growth Chart
+    const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+    const revenueChart = new Chart(revenueCtx, {
+        type: 'line',
+        data: {
+            labels: months,
+            datasets: [{
+                label: 'Revenue Growth (%)',
+                data: revenueData,
+                backgroundColor: 'rgba(211, 35, 35, 0.2)',
+                borderColor: 'rgba(211, 35, 35, 1)',
+                borderWidth: 2,
+                tension: 0.3
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Revenue Increase (%)'
+                    }
+                }
+            }
+        }
+    });
+    
+    // Tourist Visits Chart
+    const visitsCtx = document.getElementById('visitsChart').getContext('2d');
+    const visitsChart = new Chart(visitsCtx, {
+        type: 'bar',
+        data: {
+            labels: months,
+            datasets: [{
+                label: 'Tourist Visits Increase (%)',
+                data: visitsData,
+                backgroundColor: 'rgba(40, 167, 69, 0.7)'
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Visit Increase (%)'
+                    }
+                }
+            }
+        }
+    });
+    
+    // Jobs Created Chart
+    const jobsCtx = document.getElementById('jobsChart').getContext('2d');
+    const jobsChart = new Chart(jobsCtx, {
+        type: 'line',
+        data: {
+            labels: months,
+            datasets: [{
+                label: 'Jobs Created',
+                data: jobsData,
+                backgroundColor: 'rgba(0, 123, 255, 0.2)',
+                borderColor: 'rgba(0, 123, 255, 1)',
+                borderWidth: 2,
+                tension: 0.3
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Number of Jobs'
+                    }
+                }
+            }
+        }
+    });
+    
+    // Partnerships Chart
+    const partnershipsCtx = document.getElementById('partnershipsChart').getContext('2d');
+    const partnershipsChart = new Chart(partnershipsCtx, {
+        type: 'line',
+        data: {
+            labels: months,
+            datasets: [{
+                label: 'Local Partnerships',
+                data: partnershipsData,
+                backgroundColor: 'rgba(255, 193, 7, 0.2)',
+                borderColor: 'rgba(255, 193, 7, 1)',
+                borderWidth: 2,
+                tension: 0.3
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Number of Partnerships'
+                    }
+                }
+            }
+        }
+    });
+    
+    // Handle edit report buttons
+    document.querySelectorAll('.edit-report').forEach(function(button) {
+        button.addEventListener('click', function() {
+            const month = this.getAttribute('data-month');
+            const visits = this.getAttribute('data-visits');
+            const revenue = this.getAttribute('data-revenue');
+            const jobs = this.getAttribute('data-jobs');
+            const partnerships = this.getAttribute('data-partnerships');
+            
+            // Fill the form with existing data
+            document.getElementById('month_year').value = month;
+            document.getElementById('tourist_visits_increase').value = visits;
+            document.getElementById('revenue_boost_percentage').value = revenue;
+            document.getElementById('jobs_created').value = jobs;
+            document.getElementById('local_supplier_partnerships').value = partnerships;
+            
+            // Scroll to the form section
+            window.scrollTo({
+                top: document.querySelector('h3:contains("Add Impact Report")').offsetTop,
+                behavior: 'smooth'
+            });
+        });
+    });
+});
+</script>
+{% endblock %}

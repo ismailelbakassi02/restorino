@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Restorino{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <h1>Welcome, {{ current_user.name }}</h1>
+        <p>Manage your Restorino experience</p>
+    </div>
+
+    {% if current_user.user_type == 'tourist' %}
+    <!-- Tourist Dashboard -->
+    <div class="dashboard-section">
+        <div class="dashboard-card profile-card">
+            <div class="card-header">
+                <h2>Your Profile</h2>
+            </div>
+            <div class="card-body">
+                <div class="profile-info">
+                    <p><strong>Name:</strong> {{ current_user.name }}</p>
+                    <p><strong>Email:</strong> {{ current_user.email }}</p>
+                    <p><strong>Country:</strong> {{ tourist.country }}</p>
+                    <p><strong>Member Since:</strong> {{ current_user.created_at.strftime('%B %d, %Y') }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard-section">
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h2>Your Reviews</h2>
+            </div>
+            <div class="card-body">
+                {% if reviews %}
+                <div class="reviews-list">
+                    {% for review in reviews %}
+                    <div class="review-item">
+                        <div class="review-header">
+                            <h3>
+                                <a href="{{ url_for('main.restaurant_detail', id=review.restaurant.id) }}">
+                                    {{ review.restaurant.name }}
+                                </a>
+                            </h3>
+                            <div class="review-rating">
+                                {% for i in range(5) %}
+                                    {% if i < review.rating %}
+                                    <i class="fas fa-star"></i>
+                                    {% else %}
+                                    <i class="far fa-star"></i>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="review-date">{{ review.date.strftime('%B %d, %Y') }}</div>
+                        <div class="review-content">{{ review.comment }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-comment-slash"></i>
+                    <p>You haven't written any reviews yet.</p>
+                    <a href="{{ url_for('main.index') }}" class="btn-primary">Discover Restaurants</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    {% else %}
+    <!-- Restaurant Owner Dashboard -->
+    <div class="dashboard-section">
+        <div class="dashboard-card profile-card">
+            <div class="card-header">
+                <h2>Your Profile</h2>
+            </div>
+            <div class="card-body">
+                <div class="profile-info">
+                    <p><strong>Name:</strong> {{ current_user.name }}</p>
+                    <p><strong>Email:</strong> {{ current_user.email }}</p>
+                    <p><strong>Contact Number:</strong> {{ owner.contact_number }}</p>
+                    <p><strong>Member Since:</strong> {{ current_user.created_at.strftime('%B %d, %Y') }}</p>
+                    <p><strong>Verification Status:</strong> 
+                        {% if owner.is_verified %}
+                        <span class="badge verified">Verified</span>
+                        {% else %}
+                        <span class="badge pending">Pending Verification</span>
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard-section">
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h2>Your Restaurants</h2>
+                {% if owner.is_verified %}
+                <a href="{{ url_for('main.add_restaurant') }}" class="btn-primary">Add New Restaurant</a>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                {% if restaurants %}
+                <div class="restaurants-grid">
+                    {% for restaurant in restaurants %}
+                    <div class="restaurant-card">
+                        <a href="{{ url_for('main.restaurant_detail', id=restaurant.id) }}">
+                            {% set photos = restaurant.photos %}
+                            <div class="restaurant-image">
+                                {% if photos %}
+                                <img src="{{ url_for('static', filename=photos[0].image_url) }}" alt="{{ restaurant.name }}">
+                                {% else %}
+                                <div class="no-image">
+                                    <i class="fas fa-utensils"></i>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="restaurant-info">
+                                <h3>{{ restaurant.name }}</h3>
+                                <div class="restaurant-meta">
+                                    <span class="cuisine">{{ restaurant.type }}</span>
+                                    <span class="location">{{ restaurant.location }}</span>
+                                </div>
+                                <div class="rating">
+                                    {% for i in range(5) %}
+                                        {% if i < restaurant.average_rating|int %}
+                                        <i class="fas fa-star"></i>
+                                        {% elif (i < (restaurant.average_rating + 0.5)|int) and (restaurant.average_rating % 1 >= 0.5) %}
+                                        <i class="fas fa-star-half-alt"></i>
+                                        {% else %}
+                                        <i class="far fa-star"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                    <span class="rating-value">{{ restaurant.average_rating }}</span>
+                                </div>
+                                <div class="restaurant-actions">
+                                    <a href="{{ url_for('main.add_menu_item', id=restaurant.id) }}" class="btn-secondary">Add Menu Item</a>
+                                    <a href="{{ url_for('main.add_photo', id=restaurant.id) }}" class="btn-secondary">Add Photo</a>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-store-slash"></i>
+                    <p>You haven't added any restaurants yet.</p>
+                    {% if owner.is_verified %}
+                    <a href="{{ url_for('main.add_restaurant') }}" class="btn-primary">Add Restaurant</a>
+                    {% else %}
+                    <p class="verification-message">Your account is pending verification. Once verified, you'll be able to add restaurants.</p>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

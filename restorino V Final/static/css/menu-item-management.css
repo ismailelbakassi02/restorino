@@ -1,0 +1,76 @@
+/* Menu Item Management Styles */
+
+.owner-actions {
+    background-color: #f8f9fa;
+    padding: 10px 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.no-image-placeholder {
+    height: 250px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border: 1px dashed #ccc;
+    color: #6c757d;
+}
+
+.no-image-placeholder i {
+    font-size: 48px;
+    margin-bottom: 10px;
+}
+
+.no-image-placeholder p {
+    font-size: 16px;
+    margin: 0;
+}
+
+/* Menu Item Form Styles */
+.menu-item-form .form-group {
+    margin-bottom: 20px;
+}
+
+.menu-item-form .form-label {
+    font-weight: 500;
+}
+
+.menu-item-form .form-check-label {
+    font-weight: normal;
+}
+
+.menu-item-form .spice-level-group {
+    display: flex;
+    align-items: center;
+}
+
+.menu-item-form .spice-level-group .form-check {
+    margin-right: 15px;
+}
+
+.menu-item-form .spice-icon {
+    color: #dc3545;
+}
+
+/* Image Preview Styles */
+.current-image {
+    border: 1px solid #dee2e6;
+    padding: 10px;
+    border-radius: 8px;
+    background-color: #f8f9fa;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .owner-actions .d-flex {
+        flex-direction: column;
+        gap: 10px !important;
+    }
+    
+    .owner-actions .btn {
+        width: 100%;
+    }
+}

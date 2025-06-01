@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block title %}Edit {{ menu_item.name }} - {{ restaurant.name }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h2 class="mb-0">Edit Menu Item</h2>
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="row">
+                            <!-- Basic Information -->
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.name.label(class="form-label") }}
+                                    {{ form.name(class="form-control") }}
+                                    {% for error in form.name.errors %}
+                                    <div class="text-danger">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.price.label(class="form-label") }}
+                                    {{ form.price(class="form-control") }}
+                                    {% for error in form.price.errors %}
+                                    <div class="text-danger">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Description -->
+                        <div class="mb-3">
+                            {{ form.description.label(class="form-label") }}
+                            {{ form.description(class="form-control", rows=3) }}
+                            {% for error in form.description.errors %}
+                            <div class="text-danger">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        
+                        <!-- Ingredients -->
+                        <div class="mb-3">
+                            {{ form.ingredients.label(class="form-label") }}
+                            {{ form.ingredients(class="form-control", rows=2) }}
+                            {% for error in form.ingredients.errors %}
+                            <div class="text-danger">{{ error }}</div>
+                            {% endfor %}
+                            <div class="form-text">List ingredients separated by commas</div>
+                        </div>
+                        
+                        <!-- Preparation Time -->
+                        <div class="mb-3">
+                            {{ form.preparation_time.label(class="form-label") }}
+                            {{ form.preparation_time(class="form-control") }}
+                            {% for error in form.preparation_time.errors %}
+                            <div class="text-danger">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        
+                        <!-- Dietary Options -->
+                        <div class="mb-3">
+                            <label class="form-label">Dietary Options</label>
+                            <div class="d-flex flex-wrap gap-4">
+                                <div class="form-check">
+                                    {{ form.is_vegetarian(class="form-check-input") }}
+                                    {{ form.is_vegetarian.label(class="form-check-label") }}
+                                </div>
+                                <div class="form-check">
+                                    {{ form.is_vegan(class="form-check-input") }}
+                                    {{ form.is_vegan.label(class="form-check-label") }}
+                                </div>
+                                <div class="form-check">
+                                    {{ form.is_gluten_free(class="form-check-input") }}
+                                    {{ form.is_gluten_free.label(class="form-check-label") }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Spice Level -->
+                        <div class="mb-3">
+                            {{ form.spice_level.label(class="form-label") }}
+                            {{ form.spice_level(class="form-select") }}
+                            {% for error in form.spice_level.errors %}
+                            <div class="text-danger">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        
+                        <!-- Current Image Display -->
+                        {% if menu_item.image_url %}
+                        <div class="mb-3">
+                            <label class="form-label">Current Image</label>
+                            <div>
+                                <img src="{{ url_for('static', filename=menu_item.image_url) }}" alt="{{ menu_item.name }}" class="img-thumbnail" style="max-height: 200px;">
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Photo Upload -->
+                        <div class="mb-4">
+                            {{ form.photo.label(class="form-label") }}
+                            {{ form.photo(class="form-control") }}
+                            {% for error in form.photo.errors %}
+                            <div class="text-danger">{{ error }}</div>
+                            {% endfor %}
+                            <div class="form-text">Leave empty to keep the current image</div>
+                        </div>
+                        
+                        <!-- Submit Button -->
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('main.menu_item_detail', id=menu_item.id) }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-1"></i> Back
+                            </a>
+                            {{ form.submit(class="btn btn-primary") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

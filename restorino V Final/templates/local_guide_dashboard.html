@@ -1,0 +1,231 @@
+{% extends "base.html" %}
+
+{% block title %}Local Guide Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Guide Profile</h4>
+                </div>
+                <div class="card-body text-center">
+                    <img src="{{ url_for('static', filename='uploads/' + guide.user.profile_image) if guide.user.profile_image else 'https://via.placeholder.com/150' }}" 
+                         class="rounded-circle img-fluid mb-3" style="max-width: 150px;">
+                    <h5>{{ guide.user.name }}</h5>
+                    <p class="text-muted">{{ guide.neighborhood_expert }} Expert</p>
+                    
+                    {% if guide.verification_badge %}
+                    <span class="badge bg-success mb-2"><i class="fas fa-check-circle me-1"></i> Verified Guide</span>
+                    {% else %}
+                    <span class="badge bg-warning text-dark mb-2"><i class="fas fa-clock me-1"></i> Pending Verification</span>
+                    {% endif %}
+                    
+                    <div class="guide-points mt-3">
+                        <h6>Guide Points</h6>
+                        <div class="progress">
+                            <div class="progress-bar bg-success" role="progressbar" style="width: {{ (guide.guide_points / 1000) * 100 }}%;" 
+                                 aria-valuenow="{{ guide.guide_points }}" aria-valuemin="0" aria-valuemax="1000">
+                                {{ guide.guide_points }}
+                            </div>
+                        </div>
+                        <small class="text-muted">{{ 1000 - guide.guide_points }} points until next level</small>
+                    </div>
+                    
+                    <div class="specialties mt-3">
+                        <h6>Specialties</h6>
+                        <div class="d-flex flex-wrap justify-content-center">
+                            {% for specialty in guide.specialties.split(',') %}
+                            <span class="badge bg-info text-dark m-1">{{ specialty }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card shadow mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Quick Stats</h4>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Active Requests:</span>
+                        <span class="badge bg-primary">{{ active_requests|length }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Completed Requests:</span>
+                        <span class="badge bg-success">{{ completed_requests|length }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Pending Requests:</span>
+                        <span class="badge bg-warning text-dark">{{ pending_requests|length }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span>Translations:</span>
+                        <span class="badge bg-info text-dark">{{ translations|length }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-9">
+            <ul class="nav nav-tabs mb-4" id="guideTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="active-tab" data-bs-toggle="tab" data-bs-target="#active" type="button" role="tab" aria-controls="active" aria-selected="true">
+                        Active Requests <span class="badge bg-primary">{{ active_requests|length }}</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending" type="button" role="tab" aria-controls="pending" aria-selected="false">
+                        Pending Requests <span class="badge bg-warning text-dark">{{ pending_requests|length }}</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="completed-tab" data-bs-toggle="tab" data-bs-target="#completed" type="button" role="tab" aria-controls="completed" aria-selected="false">
+                        Completed <span class="badge bg-success">{{ completed_requests|length }}</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="translations-tab" data-bs-toggle="tab" data-bs-target="#translations" type="button" role="tab" aria-controls="translations" aria-selected="false">
+                        Translations <span class="badge bg-info text-dark">{{ translations|length }}</span>
+                    </button>
+                </li>
+            </ul>
+            
+            <div class="tab-content" id="guideTabContent">
+                <!-- Active Requests Tab -->
+                <div class="tab-pane fade show active" id="active" role="tabpanel" aria-labelledby="active-tab">
+                    {% if active_requests %}
+                    <div class="list-group">
+                        {% for request in active_requests %}
+                        <div class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">{{ request.request_type|title }} Request</h5>
+                                <small>{{ request.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                            </div>
+                            <p class="mb-1">{{ request.request_details }}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small>From: {{ request.tourist.user.name }} ({{ request.tourist.country }})</small>
+                                <div>
+                                    <a href="{{ url_for('main.view_help_request', id=request.id) }}" class="btn btn-sm btn-primary">
+                                        <i class="fas fa-eye me-1"></i> View Details
+                                    </a>
+                                    <form action="{{ url_for('main.complete_help_request', id=request.id) }}" method="POST" class="d-inline">
+                                        <button type="submit" class="btn btn-sm btn-success">
+                                            <i class="fas fa-check me-1"></i> Mark Complete
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i> You don't have any active help requests at the moment.
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Pending Requests Tab -->
+                <div class="tab-pane fade" id="pending" role="tabpanel" aria-labelledby="pending-tab">
+                    {% if pending_requests %}
+                    <div class="list-group">
+                        {% for request in pending_requests %}
+                        <div class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">{{ request.request_type|title }} Request</h5>
+                                <small>{{ request.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                            </div>
+                            <p class="mb-1">{{ request.request_details }}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small>From: {{ request.tourist.user.name }} ({{ request.tourist.country }})</small>
+                                <div>
+                                    <a href="{{ url_for('main.view_help_request', id=request.id) }}" class="btn btn-sm btn-primary">
+                                        <i class="fas fa-eye me-1"></i> View Details
+                                    </a>
+                                    <form action="{{ url_for('main.accept_help_request', id=request.id) }}" method="POST" class="d-inline">
+                                        <button type="submit" class="btn btn-sm btn-success">
+                                            <i class="fas fa-hands-helping me-1"></i> Accept Request
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i> There are no pending help requests in your area at the moment.
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Completed Requests Tab -->
+                <div class="tab-pane fade" id="completed" role="tabpanel" aria-labelledby="completed-tab">
+                    {% if completed_requests %}
+                    <div class="list-group">
+                        {% for request in completed_requests %}
+                        <div class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">{{ request.request_type|title }} Request</h5>
+                                <small>Completed: {{ request.completed_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                            </div>
+                            <p class="mb-1">{{ request.request_details }}</p>
+                            <small>From: {{ request.tourist.user.name }} ({{ request.tourist.country }})</small>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i> You haven't completed any help requests yet.
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Translations Tab -->
+                <div class="tab-pane fade" id="translations" role="tabpanel" aria-labelledby="translations-tab">
+                    {% if translations %}
+                    <div class="list-group">
+                        {% for translation in translations %}
+                        <div class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">
+                                    {% if translation.content_type == 'menu' %}
+                                    Menu Item Translation
+                                    {% elif translation.content_type == 'description' %}
+                                    Restaurant Description Translation
+                                    {% elif translation.content_type == 'review' %}
+                                    Review Translation
+                                    {% endif %}
+                                </h5>
+                                <small>
+                                    {% for code, name in config.LANGUAGES %}
+                                        {% if code == translation.language %}
+                                            {{ name }}
+                                        {% endif %}
+                                    {% endfor %}
+                                </small>
+                            </div>
+                            <p class="mb-1">{{ translation.translated_text }}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small>Added: {{ translation.created_at.strftime('%Y-%m-%d') if translation.created_at else 'N/A' }}</small>
+                                <a href="{{ url_for('main.translate_content', content_type=translation.content_type, content_id=translation.content_id) }}" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-edit me-1"></i> Edit Translation
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i> There are no translations that need verification at the moment.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

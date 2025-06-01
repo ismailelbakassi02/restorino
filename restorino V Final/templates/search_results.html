@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block title %}Search Results - Restorino{% endblock %}
+
+{% block content %}
+<div class="search-results-container">
+    <div class="search-header">
+        <h1>Search Results</h1>
+        {% if query %}
+        <p>Results for "{{ query }}"</p>
+        {% endif %}
+    </div>
+    
+    <div class="search-content">
+        <div class="search-filters">
+            <div class="filter-card">
+                <h3>Refine Results</h3>
+                <form action="{{ url_for('main.search') }}" method="get">
+                    <input type="hidden" name="query" value="{{ search_form.query.data }}">
+                    
+                    <div class="filter-section">
+                        <h4>Cuisine</h4>
+                        <div class="filter-options">
+                            <div class="filter-option">
+                                <input type="radio" name="cuisine" id="cuisine-all" value="" {% if not search_form.cuisine.data %}checked{% endif %}>
+                                <label for="cuisine-all">All Cuisines</label>
+                            </div>
+                            {% for cuisine in config['CUISINE_TYPES'] %}
+                            <div class="filter-option">
+                                <input type="radio" name="cuisine" id="cuisine-{{ loop.index }}" value="{{ cuisine }}" {% if search_form.cuisine.data == cuisine %}checked{% endif %}>
+                                <label for="cuisine-{{ loop.index }}">{{ cuisine }}</label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <div class="filter-section">
+                        <h4>Location</h4>
+                        <div class="filter-options">
+                            <div class="filter-option">
+                                <input type="radio" name="location" id="location-all" value="" {% if not search_form.location.data %}checked{% endif %}>
+                                <label for="location-all">All Locations</label>
+                            </div>
+                            {% for location in config['AGADIR_LOCATIONS'] %}
+                            <div class="filter-option">
+                                <input type="radio" name="location" id="location-{{ loop.index }}" value="{{ location }}" {% if search_form.location.data == location %}checked{% endif %}>
+                                <label for="location-{{ loop.index }}">{{ location }}</label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <div class="filter-section">
+                        <h4>Rating</h4>
+                        <div class="filter-options">
+                            <div class="filter-option">
+                                <input type="radio" name="rating" id="rating-all" value="" {% if not search_form.rating.data %}checked{% endif %}>
+                                <label for="rating-all">Any Rating</label>
+                            </div>
+                            {% for i in range(1, 6) %}
+                            <div class="filter-option">
+                                <input type="radio" name="rating" id="rating-{{ i }}" value="{{ i }}" {% if search_form.rating.data == i|string %}checked{% endif %}>
+                                <label for="rating-{{ i }}">
+                                    {% for j in range(i) %}
+                                    <i class="fas fa-star"></i>
+                                    {% endfor %}
+                                    & Up
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <div class="filter-actions">
+                        <button type="submit" class="btn-primary">Apply Filters</button>
+                        <a href="{{ url_for('main.search') }}" class="btn-secondary">Clear All</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="search-results">
+            {% if restaurants %}
+            <div class="results-count">
+                <p>Found {{ restaurants|length }} restaurant{% if restaurants|length != 1 %}s{% endif %}</p>
+            </div>
+            
+            <div class="restaurant-list">
+                {% for restaurant in restaurants %}
+                <div class="restaurant-card horizontal">
+                    <a href="{{ url_for('main.restaurant_detail', id=restaurant.id) }}">
+                        {% set photos = restaurant.photos %}
+                        <div class="restaurant-image">
+                            {% if photos %}
+                            <img src="{{ url_for('static', filename=photos[0].image_url) }}" alt="{{ restaurant.name }}">
+                            {% else %}
+                            <div class="no-image">
+                                <i class="fas fa-utensils"></i>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="restaurant-info">
+                            <h3>{{ restaurant.name }}</h3>
+                            <div class="restaurant-meta">
+                                <span class="cuisine">{{ restaurant.type }}</span>
+                                <span class="location">{{ restaurant.location }}</span>
+                            </div>
+                            <div class="rating">
+                                {% for i in range(5) %}
+                                    {% if i < restaurant.average_rating|int %}
+                                    <i class="fas fa-star"></i>
+                                    {% elif (i < (restaurant.average_rating + 0.5)|int) and (restaurant.average_rating % 1 >= 0.5) %}
+                                    <i class="fas fa-star-half-alt"></i>
+                                    {% else %}
+                                    <i class="far fa-star"></i>
+                                    {% endif %}
+                                {% endfor %}
+                                <span class="rating-value">{{ restaurant.average_rating }}</span>
+                                <span class="review-count">({{ restaurant.reviews|length }} reviews)</span>
+                            </div>
+                            <div class="hours">
+                                <i class="far fa-clock"></i> {{ restaurant.open_time }} - {{ restaurant.close_time }}
+                            </div>
+                            {% if restaurant.description %}
+                            <div class="description-preview">
+                                {{ restaurant.description|truncate(150) }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-results">
+                <i class="fas fa-search"></i>
+                <h2>No restaurants found</h2>
+                <p>Try adjusting your search criteria or explore our categories below</p>
+                <div class="category-links">
+                    <h3>Browse by cuisine:</h3>
+                    <div class="category-buttons">
+                        {% for cuisine in config['CUISINE_TYPES'] %}
+                        <a href="{{ url_for('main.search', cuisine=cuisine) }}" class="btn-secondary">{{ cuisine }}</a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

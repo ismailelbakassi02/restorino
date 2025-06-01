@@ -1,0 +1,184 @@
+/* Profile and User Interface Styles */
+
+/* Profile Picture Styles */
+.profile-pic-small {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 5px;
+}
+
+/* Dropdown Menu Styles */
+.dropdown {
+    position: relative;
+}
+
+.dropdown-toggle {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.dropdown-toggle i.fa-caret-down {
+    margin-left: 5px;
+    transition: transform 0.2s;
+}
+
+.dropdown:hover .dropdown-toggle i.fa-caret-down {
+    transform: rotate(180deg);
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    min-width: 200px;
+    padding: 0.5rem 0;
+    z-index: 100;
+    display: none;
+    overflow: hidden;
+}
+
+.dropdown:hover .dropdown-menu {
+    display: block;
+}
+
+.dropdown-menu li {
+    display: block;
+    width: 100%;
+}
+
+.dropdown-menu li a {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    color: var(--text-color);
+    transition: background-color 0.2s;
+}
+
+.dropdown-menu li a:hover {
+    background-color: var(--off-white);
+}
+
+.dropdown-menu li a i {
+    margin-right: 10px;
+    width: 20px;
+    text-align: center;
+}
+
+/* Profile Settings Page Styles */
+.profile-image {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--primary-color);
+}
+
+.profile-placeholder {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background-color: var(--off-white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+}
+
+.profile-placeholder i {
+    font-size: 80px;
+    color: var(--gray);
+}
+
+/* Review Images Styles */
+.review-images {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.review-image {
+    width: 100px;
+    height: 100px;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.review-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s;
+}
+
+.review-image:hover img {
+    transform: scale(1.1);
+}
+
+.review-image-gallery {
+    margin-top: 15px;
+}
+
+.review-image-gallery-title {
+    font-size: 0.9rem;
+    color: var(--light-text);
+    margin-bottom: 8px;
+}
+
+/* Image Upload Preview */
+.image-preview-container {
+    margin-top: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.image-preview {
+    width: 80px;
+    height: 80px;
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+}
+
+.image-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.image-preview .remove-image {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    background-color: rgba(255, 255, 255, 0.8);
+    color: var(--primary-color);
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .dropdown-menu {
+        position: absolute;
+        width: 100%;
+        right: 0;
+    }
+    
+    .profile-pic-small {
+        width: 25px;
+        height: 25px;
+    }
+}
